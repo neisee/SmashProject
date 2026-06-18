@@ -2,24 +2,22 @@ const express = require('express');
 const app = express();
 const PORT = 3000;
 
+const usuarioRoutes = require('./src/routes/usuarioRoutes');
+
 app.use(express.json());
+
+// Servir la carpeta public (HTML, CSS y JS del navegador)
 app.use(express.static('public'));
 
-// Tus datos de siempre (El "Repository")
-app.get('/api/usuarios', (req, res) => {
-    const usuarios = [
-        { id: 1, nombre: 'Chaval', rol: 'Developer Node' },
-        { id: 2, nombre: 'Profe', rol: 'Java Senior' }
-    ];
-    res.json(usuarios);
-});
+// Enrutar las peticiones de la API
+app.use('/api/usuarios', usuarioRoutes);
 
-// 🌟 Truco PRO: Cualquier ruta que no sea /api va a escupir el index.html
-// Esto permite que si refrescas la página estando en "/saludo", no de un error 404
+// El comodín definitivo compatible con Express v5 y Node v24+
+// Devuelve el index.html para cualquier ruta (ej: /saludo) y deja que el frontend decida
 app.get('*cualquiera', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
 
 app.listen(PORT, () => {
-    console.log(`🚀 SPA corriendo en http://localhost:${PORT}`);
+    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });

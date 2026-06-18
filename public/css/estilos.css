@@ -1,0 +1,65 @@
+body { 
+    font-family: Arial, sans-serif; 
+    margin: 0; 
+    padding: 0; 
+    transition: background-color 0.5s ease-in-out; 
+}
+.header { 
+    background-color: #333; 
+    color: white; 
+    padding: 15px 20px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+}
+.header h2 { 
+    margin: 0; 
+    cursor: pointer; 
+}
+.contenedor { 
+    max-width: 600px; 
+    margin: 40px auto; 
+    padding: 20px; 
+    
+    /* 1. Convertimos el contenedor en un contenedor Flex */
+    display: flex;
+    /* 2. Le decimos que los elementos se coloquen en columna (hacia abajo) */
+    flex-direction: column;
+    /* 3. Centrado horizontal absoluto */
+    align-items: center;
+    /* 4. Centrado vertical absoluto */
+    justify-content: center;
+    /* 5. Le damos una altura mínima para que tenga espacio para centrar verticalmente */
+    min-height: 70vh; 
+}
+ul { 
+    padding: 0; 
+    list-style: none; 
+}
+li { 
+    background: #f4f4f4; 
+    margin: 10px 0; 
+    padding: 15px; 
+    border-radius: 5px; 
+    border-left: 5px solid #007bff; 
+    cursor: pointer; 
+    transition: background 1s; 
+    color: black; 
+}
+li:hover { 
+    background: #e94949; 
+}
+.vista-verde { 
+    font-size: 48px; 
+    text-align: center; 
+    /* Quitamos el margin-top viejo para que no desvíe el centrado perfecto */
+    margin: 0; 
+}
+button { 
+    padding: 10px 20px; 
+    background: #007bff; 
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+}
