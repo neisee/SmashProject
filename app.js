@@ -5,14 +5,14 @@ const PORT = 3000;
 
 app.use(express.json());
 
-// 1. Archivos ESTÁTICOS del Frontend
+// 1. RUTAS DE LA API (¡Descomentadas y arriba!)
+const apiRoutes = require('./src/routes/api'); 
+app.use('/api', apiRoutes); 
+
+// 2. Archivos ESTÁTICOS del Frontend
 app.use(express.static(path.join(__dirname, 'public')));
 
-// COMENTADO HASTA QUE CREES EL ARCHIVO:
-// const apiRoutes = require('./src/routes/api'); 
-// app.use('/api', apiRoutes); 
-
-// 2. Enrutador de la SPA
+// 3. Enrutador de la SPA (Siempre al final)
 app.get('*path', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
