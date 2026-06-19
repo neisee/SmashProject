@@ -2,22 +2,23 @@ const express = require('express');
 const app = express();
 const PORT = 3000;
 
-const usuarioRoutes = require('./src/routes/usuarioRoutes');
+// ❌ BORRAMOS la línea de usuarioRoutes (ya no la necesitamos)
+// const usuarioRoutes = require('./src/routes/usuarioRoutes'); 
 
 app.use(express.json());
 
-// Servir la carpeta public (HTML, CSS y JS del navegador)
+// ✅ MANTENER: Sirve tus archivos (HTML, CSS, JS) automáticamente
 app.use(express.static('public'));
 
-// Enrutar las peticiones de la API
-app.use('/api/usuarios', usuarioRoutes);
+// ❌ BORRAMOS el enrutador de usuarios viejo
+// app.use('/api/usuarios', usuarioRoutes);
 
-// El comodín definitivo compatible con Express v5 y Node v24+
-// Devuelve el index.html para cualquier ruta (ej: /saludo) y deja que el frontend decida
+// ✅ MANTENER: Es el truco para que las rutas SPA funcionen sin recargar
 app.get('*cualquiera', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
 
+// ✅ MANTENER: Enciende el servidor
 app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });

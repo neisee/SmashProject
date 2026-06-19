@@ -1,30 +1,34 @@
-import { obtenerUsuarios } from './services/usuarioService.js';
-import { renderInicio } from './views/inicioView.js';
-import { renderSaludo } from './views/saludoView.js';
+// public/js/router.js
+
+// 1. Importamos la función que acabamos de crear
+import { renderHola } from './views/holaView.js';
 
 function evaluarRuta() {
-    const params = new URLSearchParams(window.location.search);
-    const nombre = params.get('nombre');
+    // 1. Conseguimos la ruta actual donde está el usuario
+    const rutaActual = window.location.pathname;
 
-    if (window.location.pathname === '/saludo' && nombre) {
-        renderSaludo(nombre);
+    // 2. Si está en la raíz '/', lo redirigimos automáticamente a la subruta
+    if (rutaActual === '/' || rutaActual === '') {
+        // Usamos replaceState para que no guarde la raíz vacía en el historial de "Atrás"
+        window.history.replaceState({}, '', '/inicio'); 
+        
+        // Volvemos a ejecutar la función para que procese la nueva ruta '/inicio'
+        return evaluarRuta(); 
+    }
+
+    // 3. Evaluamos las subrutas de tu nueva app
+    if (rutaActual === '/inicio') {
+        renderHola();
     } else {
-        // Pedimos datos al servicio y cuando lleguen, renderizamos inicio
-        obtenerUsuarios().then(usuarios => {
-            renderInicio(usuarios, (nombreUsuario) => {
-                // Al pulsar un usuario, cambiamos la URL y mandamos al saludo
-                const nuevaUrl = `/saludo?nombre=${encodeURIComponent(nombreUsuario)}`;
-                window.history.pushState({}, '', nuevaUrl);
-                renderSaludo(nombreUsuario);
-            });
-        });
+        // Por si escribe cualquier otra cosa en la URL, lo mandamos a una vista 404 o de vuelta a inicio
+        console.log("Ruta no encontrada: " + rutaActual);
+        document.getElementById('vista-principal').innerHTML = `<h2>Página no encontrada 😢</h2>`;
     }
 }
 
-// Escuchar los botones Atrás/Adelante del navegador
+// Escuchas del navegador y logo
 window.addEventListener('popstate', evaluarRuta);
 
-// Escuchar clic en el logo para volver a la raíz
 document.getElementById('logo-home').addEventListener('click', () => {
     window.history.pushState({}, '', '/');
     evaluarRuta();

@@ -1,0 +1,48 @@
+CREATE TABLE Users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    hashed_password VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Leagues (
+    league_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    creator_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE,
+    invitation_code VARCHAR(8) UNIQUE NOT NULL,
+    in_progress BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE Participants (
+    participant_id SERIAL PRIMARY KEY,
+    league_id INTEGER REFERENCES Leagues(league_id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE,
+    wins INTEGER DEFAULT 0,
+    losses INTEGER DEFAULT 0,
+    lives_won INTEGER DEFAULT 0,
+    lives_against INTEGER DEFAULT 0,
+    CONSTRAINT unique_inscription UNIQUE (league_id, user_id)
+);
+
+CREATE TABLE Rounds (
+    round_id SERIAL PRIMARY KEY,
+    league_id INTEGER REFERENCES Leagues(league_id) ON DELETE CASCADE,
+    round_number INTEGER NOT NULL
+);
+
+CREATE TABLE CharactersS (
+    character_id SERIAL PRIMARY KEY,
+    character_name VARCHAR(50),
+    photo VARCHAR(255)
+);
+
+CREATE TABLE Matches (
+    id SERIAL PRIMARY KEY,
+    league_id INTEGER REFERENCES Leagues(league_id) ON DELETE CASCADE,
+    round_id INTEGER REFERENCES Rounds(round_id) ON DELETE CASCADE,
+    player1 INTEGER REFERENCES Users(user_id) ON DELETE SET NULL,
+    player2 INTEGER REFERENCES Users(user_id) ON DELETE SET NULL,
+    character1 INTEGER REFERENCES CharactersS(character_id) ON DELETE SET NULL DEFAULT NULL,
+    character2 INTEGER REFERENCES CharactersS(character_id) ON DELETE SET NULL DEFAULT NULL,
+    lives_player1 INTEGER DEFAULT NULL,
+    lives_player2 INTEGER DEFAULT NULL
+);
