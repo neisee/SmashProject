@@ -8,7 +8,7 @@ export function renderRegister() {
             <form id="form-register" class="auth-form">
                 <div class="form-group">
                     <label for="reg-username">Username</label>
-                    <input type="text" id="reg-username" required>
+                    <input type="text" id="reg-username" required autocomplete="off">
                 </div>
                 
                 <div class="form-group">

@@ -8,7 +8,7 @@ export function renderLogin() {
             <form id="form-login" class="auth-form">
                 <div class="form-group">
                     <label for="login-username">Username</label>
-                    <input type="text" id="login-username" required placeholder="Enter your username">
+                    <input type="text" id="login-username" required placeholder="Enter your username" autocomplete="off">
                 </div>
                 
                 <div class="form-group">
