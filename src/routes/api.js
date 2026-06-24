@@ -64,7 +64,7 @@ router.post('/auth/login', async (req, res) => {
         if (!passwordMatch) {
             return res.status(401).json({ error: 'Invalid username or password.' });
         }
-        
+
         res.cookie('auth_session', 'logged_in_user_' + user.user_id, {
             httpOnly: true,    // Protege contra ataques XSS (JavaScript no puede leerla)
             secure: false,     // Cambiar a true cuando uses HTTPS en producción
@@ -104,6 +104,46 @@ router.post('/auth/logout', (req, res) => {
 
     console.log('📌 User logged out successfully');
     return res.status(200).json({ message: 'Logout successful' });
+});
+
+router.get('/leagues', async (req, res) => {
+    if (!req.cookies || !req.cookies.auth_session) {
+        return res.status(401).json({ error: 'No autorizado.' });
+    }
+
+    try {
+        const cookieValue = req.cookies.auth_session;
+        const userId = cookieValue.split('logged_in_user_')[1];
+
+        // Capturamos los parámetros de paginación de la URL (ej: /api/leagues?limit=10&offset=0)
+        // Usamos parseInt para asegurarnos de que son números
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = parseInt(req.query.offset) || 0;
+
+        // Consulta que limita los resultados y se salta los que ya cargamos
+        const query = `
+            SELECT 
+                l.league_id,
+                l.name,
+                u.username AS creador,
+                l.invitation_code,
+                l.in_progress
+            FROM Leagues l
+            INNER JOIN Participants p ON l.league_id = p.league_id
+            INNER JOIN Users u ON l.creator_id = u.user_id
+            WHERE p.user_id = $1
+            ORDER BY l.league_id DESC
+            LIMIT $2 OFFSET $3
+        `;
+
+        const result = await pool.query(query, [userId, limit, offset]);
+
+        return res.status(200).json(result.rows);
+
+    } catch (error) {
+        console.error('❌ Error al obtener las ligas paginadas:', error);
+        return res.status(500).json({ error: 'Error interno del servidor.' });
+    }
 });
 
 module.exports = router;
