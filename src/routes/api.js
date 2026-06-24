@@ -146,4 +146,44 @@ router.get('/leagues', async (req, res) => {
     }
 });
 
+router.post('/auth/create-league', async (req, res) => {
+    if (!req.cookies || !req.cookies.auth_session) {
+        return res.status(401).json({ error: 'Non authorized. Log in first' });
+    }
+    const { name, inv_code } = req.body;
+    if (!name || !inv_code) {
+        return res.status(400).json({ error: 'League name and invitation code are required' });
+    }
+    try{
+        const cookieValue = req.cookies.auth_session;
+        const creatorId = cookieValue.split('logged_in_user_')[1];
+        const nameCheck = await pool.query(
+            'SELECT * FROM Leagues WHERE LOWER(name) = LOWER($1)', 
+            [name]
+        );
+        if (nameCheck.rows.length > 0) {
+            return res.status(400).json({ error: 'League name is already taken' });
+        }
+        if (inv_code.length > 8) {
+            return res.status(400).json({ error: 'Invitation Code cannot be longer than 8 characters.' });
+        }
+        const newLeagueResult = await pool.query(
+            'INSERT INTO Leagues(name, invitation_code, creator_id) VALUES ($1, $2, $3) RETURNING league_id',
+            [name, inv_code, creatorId]
+        );
+        const newLeagueId = newLeagueResult.rows[0].league_id;
+        await pool.query(
+            'INSERT INTO Participants (league_id, user_id) VALUES ($1, $2)',
+            [newLeagueId, creatorId]
+        );
+        return res.status(201).json({ 
+            message: 'League successfully created!', 
+            leagueId: newLeagueId 
+        });
+    } catch (error) {
+        console.error('League creation error', error);
+        return res.status(500).json({ error: 'Database server error' });
+    }
+})
+
 module.exports = router;

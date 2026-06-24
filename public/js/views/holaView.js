@@ -28,7 +28,10 @@ export async function renderHola() {
 
     // 2. Escuchas de eventos para los nuevos botones (de momento imprimen en consola)
     document.getElementById('btn-create-league').addEventListener('click', () => {
-        console.log("Redirecting to create a new league...");
+        // Cambiamos la URL de la barra de navegación a '/create-league'
+        window.history.pushState({}, '', '/create-league');
+        // Le avisamos a tu enrutador (router) que la URL cambió para que pinte la nueva vista
+        window.dispatchEvent(new Event('popstate'));
     });
 
     document.getElementById('btn-join-league').addEventListener('click', () => {

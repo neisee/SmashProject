@@ -1,6 +1,7 @@
 import { renderHola } from './views/holaView.js';
 import { renderRegister } from './views/registerView.js';
 import { renderLogin } from './views/loginView.js';
+import { renderCreateLeague } from './views/createLeagueView.js';
 
 // Nueva función auxiliar para consultar la cookie al servidor
 async function checkAuthStatus() {
@@ -28,13 +29,12 @@ async function evaluarRuta() {
 
     // --- ENTORNO NO LOGUEADO ---
     if (!isLoggedIn) {
-        // Mostramos los botones de login/register en la barra superior si estaban ocultos
         btnLogin.style.display = 'block';
         btnRegister.style.display = 'block';
         btnLogout.style.display = 'none';
 
-        // Si intenta entrar a la raíz o a cualquier ruta privada, lo mandamos directo a /login
-        if (rutaActual === '/' || rutaActual === '' || rutaActual === '/hola' || rutaActual === '/inicio') {
+        // ✨ CORRECCIÓN 1: Si intentan entrar a /create-league sin sesión, los echa al /login
+        if (rutaActual === '/' || rutaActual === '') {
             window.history.replaceState({}, '', '/login');
             btnLogin.classList.add('activo');
             return renderLogin();
@@ -44,10 +44,14 @@ async function evaluarRuta() {
             btnLogin.classList.add('activo');
             return renderLogin();
         }
-
-        if (rutaActual === '/register') {
+        else if (rutaActual === '/register') {
             btnRegister.classList.add('activo');
             return renderRegister();
+        }
+        else{
+            window.history.replaceState({}, '', '/login');
+            btnLogin.classList.add('activo');
+            return renderLogin();
         }
     } 
     
@@ -59,12 +63,20 @@ async function evaluarRuta() {
         btnLogout.style.display = 'block';
 
         // Si está logueado y va a la raíz, al login o al registro, lo mandamos a /hola
-        if (rutaActual === '/' || rutaActual === '' || rutaActual === '/login' || rutaActual === '/register' || rutaActual === '/inicio') {
+        if (rutaActual === '/' || rutaActual === '') {
             window.history.replaceState({}, '', '/hola');
             return renderHola();
         }
 
         if (rutaActual === '/hola') {
+            return renderHola();
+        }
+        else if (rutaActual === '/create-league'){
+            return renderCreateLeague();
+        }
+        else{
+            window.history.replaceState({}, '', '/hola');
+            btnLogin.classList.add('activo');
             return renderHola();
         }
     }

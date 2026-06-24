@@ -8,7 +8,7 @@ CREATE TABLE Leagues (
     league_id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     creator_id INTEGER REFERENCES Users(user_id) ON DELETE CASCADE,
-    invitation_code VARCHAR(8) UNIQUE NOT NULL,
+    invitation_code VARCHAR(8) NOT NULL,
     in_progress BOOLEAN DEFAULT FALSE
 );
 
