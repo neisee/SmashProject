@@ -1,3 +1,4 @@
+/* --- ESTILOS GENERALES Y BASE --- */
 body { 
     font-family: Arial, sans-serif; 
     margin: 0; 
@@ -6,35 +7,197 @@ body {
     color: white; /* Texto blanco por defecto */
 }
 
-.header { 
-    background-color: #1a1a1a; /* Gris muy oscuro para la barra */
-    color: white; 
-    padding: 15px 20px; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    border-bottom: 1px solid #333;
-}
-
-.header h2 { 
-    margin: 0; 
-    cursor: pointer; 
-}
-
 .contenedor { 
     max-width: 600px; 
     margin: 0 auto; 
     padding: 20px; 
     
-    /* Centrado absoluto para el "Hola qué tal" */
+    /* Nota: Si vas a renderizar el listado de ligas aquí, 
+       es mejor quitar el flex-center absoluto para que las tarjetas no se aplasten. 
+       De momento lo mantengo como lo tenías: */
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 80vh; /* Ocupa casi toda la pantalla para que se note el centro */
+    min-height: 80vh; 
 }
 
 .hola-texto {
     font-size: 32px;
     font-weight: bold;
     text-align: center;
+}
+
+/* --- BARRA SUPERIOR (HEADER) OPTIMIZADA PARA CENTRADO ABSOLUTO --- */
+.header { 
+    background-color: #1a1a1a; 
+    color: white; 
+    padding: 8px 20px; 
+    display: flex; 
+    align-items: center; 
+    border-bottom: 1px solid #333;
+    position: relative; /* OBLIGATORIO: actua como ancla para el contenedor del centro */
+    min-height: 45px;   /* Evita que colapse la altura si quitas elementos */
+}
+
+/* El logo se queda a la izquierda ocupando solo su propio espacio */
+#logo-home { 
+    margin: 0; 
+    cursor: pointer; 
+    display: flex;
+    align-items: center;
+    gap: 6px; 
+    z-index: 2; /* Asegura que el logo sea cliqueable y no se tape por el centro */
+}
+
+/* Icono redondo de SmashProject */
+.logo-icono {
+    width: 45px;          
+    height: 45px;         
+    object-fit: cover;    
+    border-radius: 50%; 
+    border: 1px solid #333; 
+}
+
+/* CONTENEDOR CENTRAL (Clavado en el centro real de la pantalla) */
+.header-center {
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    gap: 12px;               
+    
+    /* El truco definitivo de centrado absoluto: */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    
+    z-index: 1;
+}
+
+/* A partir de aquí tus botones (.btn-nav y .btn-nav.activo) se quedan exactamente igual */
+.btn-nav {
+    background-color: #242424; 
+    color: #e0e0e0;
+    border: 1px solid #444;    
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;        
+    cursor: pointer;
+    white-space: nowrap;       
+    transition: all 0.2s ease; 
+}
+
+.btn-nav:hover {
+    background-color: #2a2a2a;
+    border-color: #666;
+    color: white;
+}
+
+.btn-nav:active {
+    transform: scale(0.97);    
+}
+
+.btn-nav.activo {
+    background-color: #121212;     
+    border: 1.5px solid #4caf50;   
+    color: #4caf50;                
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.2); 
+    pointer-events: none;          
+}
+
+/* --- VISTAS DE AUTENTICACIÓN (REGISTER / LOGIN) --- */
+.auth-container {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    padding: 30px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px; /* Se adapta perfectamente dentro de tu .contenedor de 600px */
+    box-sizing: border-box;
+}
+
+.auth-container h2 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    text-align: center;
+    font-size: 24px;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 14px;
+    color: #aaa;
+}
+
+.form-group input {
+    background-color: #242424;
+    border: 1px solid #444;
+    color: white;
+    padding: 10px 12px;
+    font-size: 15px;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+    border-color: #4caf50; /* Cambia a verde Smash al escribir */
+}
+
+/* Botón de envío grande */
+.btn-auth {
+    background-color: #4caf50;
+    color: #121212;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-auth:hover {
+    background-color: #45a049;
+}
+
+.btn-auth:active {
+    transform: scale(0.98);
+}
+
+/* Mensajes de feedback (Error y Éxito) */
+.error-msg {
+    color: #ff6b6b;
+    font-size: 14px;
+    background-color: rgba(255, 107, 107, 0.1);
+    padding: 8px 12px;
+    border-radius: 4px;
+    border-left: 3px solid #ff6b6b;
+}
+
+.success-msg {
+    color: #4caf50;
+    font-size: 14px;
+    background-color: rgba(76, 175, 80, 0.1);
+    padding: 8px 12px;
+    border-radius: 4px;
+    border-left: 3px solid #4caf50;
+}
+
+.oculto {
+    display: none !important;
 }
