@@ -1,6 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
 /* --- ESTILOS GENERALES Y BASE --- */
 body { 
-    font-family: Arial, sans-serif; 
+    font-family: 'Inter', sans-serif; 
     margin: 0; 
     padding: 0; 
     background-color: #121212; /* Fondo negro elegante */
@@ -76,6 +77,7 @@ body {
 
 /* A partir de aquí tus botones (.btn-nav y .btn-nav.activo) se quedan exactamente igual */
 .btn-nav {
+    font-family: inherit;
     background-color: #242424; 
     color: #e0e0e0;
     border: 1px solid #444;    
@@ -231,4 +233,70 @@ body {
 
 .btn-danger:active {
     transform: scale(0.97);
+}
+/* --- BOTÓN DE JOIN LEAGUE (Con transición de fondo real) --- */
+.btn-fire-join {
+    position: relative;        /* Necesario para posicionar el fuego encima */
+    overflow: hidden;         /* Evita que el fuego se salga de las esquinas redondeadas */
+    z-index: 1;               /* Asegura que el texto quede visible */
+    
+    font-family: inherit;
+    background-color: #242424; /* Color oscuro base */
+    color: #ff8b0f;            /* Color cyan inicial */
+    border: 1px solid #ff8b0f; /* Borde cyan inicial */
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;        
+    cursor: pointer;
+    white-space: nowrap;       
+    transition: color 0.4s ease, border-color 0.4s ease, transform 0.3s ease, box-shadow 0.4s ease;
+}
+
+/* 🔥 CAPA OCULTA CON EL FUEGO 🔥 */
+.btn-fire-join::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -1;              /* Se coloca detrás del texto del botón */
+    
+    /* Tu degradado de fuego con #ff8b0f */
+    background: linear-gradient(135deg, #cc2300 0%, #ff8b0f 50%, #ffcc00 100%);
+    
+    opacity: 0;               /* Inicialmente apagado e invisible */
+    transition: opacity 0.4s ease; /* ¡Esta es la transición suave del fondo! */
+}
+
+/* 👀 EFECTO HOVER (Al pasar el ratón) */
+.btn-fire-join:hover {
+    font-weight: 700;             /* Engrosa la letra */
+    border-color: transparent;    /* El borde cyan se desvanece */
+    color: #121212;               /* El texto cambia a oscuro suavemente */
+    transform: translateY(-2px);
+    
+    /* Resplandor de fuego intenso */
+    box-shadow: 0 0 20px rgba(255, 139, 15, 0.8), 0 0 8px rgba(255, 204, 0, 0.6);
+    
+    /* Activamos la animación de parpadeo de las sombras */
+    animation: join-flame-pulse 1.5s infinite alternate ease-in-out;
+}
+
+/* Al hacer hover, encendemos la capa de fuego suavizándola */
+.btn-fire-join:hover::before {
+    opacity: 1;
+}
+
+/* Efecto de pulsación al hacer click */
+.btn-fire-join:active {
+    transform: translateY(0) scale(0.97);
+}
+
+/* --- ANIMACIÓN DE LA LLAMA --- */
+@keyframes join-flame-pulse {
+    0% {
+        box-shadow: 0 0 10px rgba(255, 139, 15, 0.6), 0 0 4px rgba(255, 204, 0, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 22px rgba(255, 139, 15, 0.9), 0 0 12px rgba(255, 204, 0, 0.7);
+    }
 }
