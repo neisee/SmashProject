@@ -1,4 +1,5 @@
 // src/routes/api.js
+const bcrypt = require('bcrypt');
 const express = require('express');
 const router = express.Router();
 
@@ -26,13 +27,16 @@ router.post('/auth/register', async (req, res) => {
         }
 
         // Insertar el usuario real en tu base de datos smash_project
-        await pool.query(
-            'INSERT INTO Users (username, hashed_password) VALUES ($1, $2)',
-            [username, password]
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const result = await pool.query(
+            'INSERT INTO Users (username, hashed_password) VALUES ($1, $2) RETURNING user_id, username',
+            [username.trim(), hashedPassword]
         );
-
-        console.log(`User registered in Postgres: ${username}`);
-        return res.status(201).json({ message: 'User registered successfully!' });
+        return res.status(201).json({
+            message: 'User registered successfully!',
+            user: result.rows[0]
+        });
 
     } catch (error) {
         console.error('Register error', error);
@@ -55,10 +59,12 @@ router.post('/auth/login', async (req, res) => {
             return res.status(401).json({ error: 'username does not exist' });
         }
         const user = result.rows[0];
-        if (password !== user.hashed_password) {
+
+        const passwordMatch = await bcrypt.compare(password, user.hashed_password);
+        if (!passwordMatch) {
             return res.status(401).json({ error: 'Invalid username or password.' });
         }
-
+        
         res.cookie('auth_session', 'logged_in_user_' + user.user_id, {
             httpOnly: true,    // Protege contra ataques XSS (JavaScript no puede leerla)
             secure: false,     // Cambiar a true cuando uses HTTPS en producción
@@ -86,6 +92,18 @@ router.get('/auth/status', (req, res) => {
         return res.status(200).json({ loggedIn: true });
     }
     return res.status(200).json({ loggedIn: false });
+});
+
+router.post('/auth/logout', (req, res) => {
+    // Borramos la cookie pasándole el mismo nombre y las mismas opciones de seguridad
+    res.clearCookie('auth_session', {
+        httpOnly: true,
+        secure: false, // Cambiar a true en producción con HTTPS
+        sameSite: 'lax'
+    });
+
+    console.log('📌 User logged out successfully');
+    return res.status(200).json({ message: 'Logout successful' });
 });
 
 module.exports = router;

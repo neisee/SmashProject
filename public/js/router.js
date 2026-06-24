@@ -20,6 +20,7 @@ async function evaluarRuta() {
 
     const btnLogin = document.getElementById('btn-login');
     const btnRegister = document.getElementById('btn-register');
+    const btnLogout = document.getElementById('btn-logout');
 
     // Reseteamos clases de iluminación
     btnLogin.classList.remove('activo');
@@ -30,6 +31,7 @@ async function evaluarRuta() {
         // Mostramos los botones de login/register en la barra superior si estaban ocultos
         btnLogin.style.display = 'block';
         btnRegister.style.display = 'block';
+        btnLogout.style.display = 'none';
 
         // Si intenta entrar a la raíz o a cualquier ruta privada, lo mandamos directo a /login
         if (rutaActual === '/' || rutaActual === '' || rutaActual === '/hola' || rutaActual === '/inicio') {
@@ -54,6 +56,7 @@ async function evaluarRuta() {
         // Ocultamos los botones de login y registro porque ya tiene sesión iniciada
         btnLogin.style.display = 'none';
         btnRegister.style.display = 'none';
+        btnLogout.style.display = 'block';
 
         // Si está logueado y va a la raíz, al login o al registro, lo mandamos a /hola
         if (rutaActual === '/' || rutaActual === '' || rutaActual === '/login' || rutaActual === '/register' || rutaActual === '/inicio') {
@@ -87,6 +90,20 @@ document.getElementById('btn-login').addEventListener('click', () => {
 document.getElementById('btn-register').addEventListener('click', () => {
     window.history.pushState({}, '', '/register');
     evaluarRuta();
+});
+
+document.getElementById('btn-logout').addEventListener('click', async () => {
+    try {
+        const respuesta = await fetch('/api/auth/logout', { method: 'POST' });
+        
+        if (respuesta.ok) {
+            // Si el servidor borra la cookie con éxito, mandamos al usuario a la raíz
+            window.history.pushState({}, '', '/');
+            evaluarRuta(); // Al evaluar la ruta sin cookie, el entorno lo mandará automáticamente a /login
+        }
+    } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+    }
 });
 
 // Ejecución inicial al cargar la web

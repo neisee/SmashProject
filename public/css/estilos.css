@@ -201,3 +201,34 @@ body {
 .oculto {
     display: none !important;
 }
+
+.header-right {
+    display: flex;
+    align-items: center;
+    margin-left: auto; /* Empuja este bloque al extremo derecho de forma limpia */
+    z-index: 2;        /* Asegura que el botón no sea tapado por el contenedor central */
+}
+
+.btn-danger {
+    background-color: #242424; /* Color base oscuro integrado con la app */
+    color: #ff6b6b;            /* Texto en rojo sutil */
+    border: 1px solid #552222; /* Borde rojizo apagado */
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+    background-color: #bd2130; /* Al pasar el ratón, cambia a un rojo sólido potente */
+    border-color: #ff6b6b;
+    color: white;
+    box-shadow: 0 0 10px rgba(220, 53, 69, 0.2);
+}
+
+.btn-danger:active {
+    transform: scale(0.97);
+}
