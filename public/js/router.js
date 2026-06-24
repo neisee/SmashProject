@@ -1,5 +1,6 @@
 import { renderHola } from './views/holaView.js';
 import { renderRegister } from './views/registerView.js';
+import { renderLogin } from './views/loginView.js';
 
 function evaluarRuta() {
     const rutaActual = window.location.pathname;
@@ -26,7 +27,7 @@ function evaluarRuta() {
     } else if (rutaActual === '/login') {
         // Iluminamos el botón de Login
         btnLogin.classList.add('activo');
-        document.getElementById('vista-principal').innerHTML = `<h2>Pantalla de Login 🔐</h2>`;
+        renderLogin();
         
     } else if (rutaActual === '/register') {
         // Iluminamos el botón de Register

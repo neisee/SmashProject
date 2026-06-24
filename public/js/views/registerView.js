@@ -21,10 +21,10 @@ export function renderRegister() {
                     <input type="password" id="reg-password-confirm" required>
                 </div>
 
-                <div id="register-error" class="error-msg oculto">Hola</div>
+                <div id="register-error" class="error-msg oculto"></div>
                 <div id="register-success" class="success-msg oculto">Register Completed</div>
 
-                <button type="submit" class="btn-auth">Registrarse</button>
+                <button type="submit" class="btn-auth">Register</button>
             </form>
         </div>
     `;
