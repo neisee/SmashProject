@@ -58,6 +58,14 @@ router.post('/auth/login', async (req, res) => {
         if (password !== user.hashed_password) {
             return res.status(401).json({ error: 'Invalid username or password.' });
         }
+
+        res.cookie('auth_session', 'logged_in_user_' + user.user_id, {
+            httpOnly: true,    // Protege contra ataques XSS (JavaScript no puede leerla)
+            secure: false,     // Cambiar a true cuando uses HTTPS en producción
+            sameSite: 'lax',   // Protección básica contra CSRF
+            maxAge: 24 * 60 * 60 * 1000 // Expira en 1 día
+        });
+
         console.log('User susccessfully logged in: ${user.username}');
         return res.status(200).json({ 
             message: 'Login successful!',
@@ -70,6 +78,14 @@ router.post('/auth/login', async (req, res) => {
         console.error('Database error during login:', error);
         return res.status(500).json({ error: 'Internal server error. Please try again later.' });
     }
+});
+
+router.get('/auth/status', (req, res) => {
+    // Comprobamos si existe nuestra cookie
+    if (req.cookies && req.cookies.auth_session) {
+        return res.status(200).json({ loggedIn: true });
+    }
+    return res.status(200).json({ loggedIn: false });
 });
 
 module.exports = router;

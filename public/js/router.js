@@ -2,45 +2,76 @@ import { renderHola } from './views/holaView.js';
 import { renderRegister } from './views/registerView.js';
 import { renderLogin } from './views/loginView.js';
 
-function evaluarRuta() {
-    const rutaActual = window.location.pathname;
-
-    // Redirección de la raíz a /inicio
-    if (rutaActual === '/' || rutaActual === '') {
-        window.history.replaceState({}, '', '/inicio'); 
-        return evaluarRuta(); 
-    }
-
-    // --- CONTROL DE ESTADO ACTIVO ---
-    const btnLogin = document.getElementById('btn-login');
-    const btnRegister = document.getElementById('btn-register');
-
-    // Primero quitamos la clase activo de todos los botones para resetear el estado
-    btnLogin.classList.remove('activo');
-    btnRegister.classList.remove('activo');
-
-    // 3. Evaluamos las rutas e iluminamos el contorno del botón correspondiente
-    if (rutaActual === '/inicio') {
-        // Si estás en inicio, ninguno está activo (o el de inicio si tuvieras uno)
-        renderHola();
-        
-    } else if (rutaActual === '/login') {
-        // Iluminamos el botón de Login
-        btnLogin.classList.add('activo');
-        renderLogin();
-        
-    } else if (rutaActual === '/register') {
-        // Iluminamos el botón de Register
-        btnRegister.classList.add('activo');
-        renderRegister();
-        
-    } else {
-        console.log("Ruta no encontrada: " + rutaActual);
-        document.getElementById('vista-principal').innerHTML = `<h2>Página no encontrada 😢</h2>`;
+// Nueva función auxiliar para consultar la cookie al servidor
+async function checkAuthStatus() {
+    try {
+        const respuesta = await fetch('/api/auth/status');
+        const datos = await respuesta.json();
+        return datos.loggedIn; // Devuelve true o false
+    } catch (error) {
+        return false;
     }
 }
 
-// --- ESCUCHAS DE EVENTOS (Se quedan exactamente igual) ---
+// Convertimos evaluarRuta en una función ASYNC
+async function evaluarRuta() {
+    const rutaActual = window.location.pathname;
+    const isLoggedIn = await checkAuthStatus(); // Esperamos la respuesta del servidor
+
+    const btnLogin = document.getElementById('btn-login');
+    const btnRegister = document.getElementById('btn-register');
+
+    // Reseteamos clases de iluminación
+    btnLogin.classList.remove('activo');
+    btnRegister.classList.remove('activo');
+
+    // --- ENTORNO NO LOGUEADO ---
+    if (!isLoggedIn) {
+        // Mostramos los botones de login/register en la barra superior si estaban ocultos
+        btnLogin.style.display = 'block';
+        btnRegister.style.display = 'block';
+
+        // Si intenta entrar a la raíz o a cualquier ruta privada, lo mandamos directo a /login
+        if (rutaActual === '/' || rutaActual === '' || rutaActual === '/hola' || rutaActual === '/inicio') {
+            window.history.replaceState({}, '', '/login');
+            btnLogin.classList.add('activo');
+            return renderLogin();
+        }
+
+        if (rutaActual === '/login') {
+            btnLogin.classList.add('activo');
+            return renderLogin();
+        }
+
+        if (rutaActual === '/register') {
+            btnRegister.classList.add('activo');
+            return renderRegister();
+        }
+    } 
+    
+    // --- ENTORNO LOGUEADO ---
+    else {
+        // Ocultamos los botones de login y registro porque ya tiene sesión iniciada
+        btnLogin.style.display = 'none';
+        btnRegister.style.display = 'none';
+
+        // Si está logueado y va a la raíz, al login o al registro, lo mandamos a /hola
+        if (rutaActual === '/' || rutaActual === '' || rutaActual === '/login' || rutaActual === '/register' || rutaActual === '/inicio') {
+            window.history.replaceState({}, '', '/hola');
+            return renderHola();
+        }
+
+        if (rutaActual === '/hola') {
+            return renderHola();
+        }
+    }
+
+    // --- RUTA NO ENCONTRADA (404) ---
+    console.log("Ruta no encontrada: " + rutaActual);
+    document.getElementById('vista-principal').innerHTML = `<h2>Page not found 😢</h2>`;
+}
+
+// --- ESCUCHAS DE EVENTOS ---
 window.addEventListener('popstate', evaluarRuta);
 
 document.getElementById('logo-home').addEventListener('click', () => {
@@ -58,4 +89,5 @@ document.getElementById('btn-register').addEventListener('click', () => {
     evaluarRuta();
 });
 
+// Ejecución inicial al cargar la web
 evaluarRuta();
