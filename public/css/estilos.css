@@ -300,3 +300,29 @@ body {
         box-shadow: 0 0 22px rgba(255, 139, 15, 0.9), 0 0 12px rgba(255, 204, 0, 0.7);
     }
 }
+
+.btn-profile {
+    font-family: inherit;
+    background-color: #242424; 
+    color: #4caf50;            /* Color verde Smash como tus botones activos */
+    border: 1px solid #2e5a30; /* Borde verde oscuro apagado */
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;        
+    cursor: pointer;
+    white-space: nowrap; 
+    margin-right: 12px;        /* Espacio de separación con el botón Log Out */
+    transition: all 0.2s ease; 
+}
+
+.btn-profile:hover {
+    background-color: rgba(76, 175, 80, 0.1); /* Destello verde sutil al pasar el mouse */
+    border-color: #4caf50;                    /* Resalta el borde al color verde vivo */
+    color: white;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.15);
+}
+
+.btn-profile:active {
+    transform: scale(0.97);    /* Efecto de pulsación */
+}

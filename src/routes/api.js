@@ -11,6 +11,7 @@ router.post('/auth/register', authController.register);
 router.post('/auth/login', authController.login);
 router.get('/auth/status', authController.status);
 router.post('/auth/logout', authController.logout);
+router.put('/auth/update-account', authController.updateAccount);
 
 // Rutas de Ligas
 router.get('/leagues', leagueController.getLeagues);

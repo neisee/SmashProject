@@ -3,36 +3,45 @@ import { renderRegister } from './views/registerView.js';
 import { renderLogin } from './views/loginView.js';
 import { renderCreateLeague } from './views/createLeagueView.js';
 import { renderJoinLeague } from './views/joinLeagueView.js';
+import { renderEditAccount } from './views/editAccountView.js';
 
 // Nueva función auxiliar para consultar la cookie al servidor
 async function checkAuthStatus() {
     try {
         const respuesta = await fetch('/api/auth/status');
         const datos = await respuesta.json();
-        return datos.loggedIn; // Devuelve true o false
+        
+        // Devolvemos un objeto con el estado y el nombre
+        return { 
+            loggedIn: datos.loggedIn, 
+            username: datos.user?.username || 'Cuenta' 
+        };
     } catch (error) {
-        return false;
+        return { loggedIn: false, username: '' };
     }
 }
 
 // Convertimos evaluarRuta en una función ASYNC
 async function evaluarRuta() {
     const rutaActual = window.location.pathname;
-    const isLoggedIn = await checkAuthStatus(); // Esperamos la respuesta del servidor
+    const auth = await checkAuthStatus();
 
     const btnLogin = document.getElementById('btn-login');
     const btnRegister = document.getElementById('btn-register');
     const btnLogout = document.getElementById('btn-logout');
+    const btnEditProfile = document.getElementById('btn-edit-profile');
 
     // Reseteamos clases de iluminación
     btnLogin.classList.remove('activo');
     btnRegister.classList.remove('activo');
+    if (btnEditProfile) btnEditProfile.classList.remove('activo');
 
     // --- ENTORNO NO LOGUEADO ---
-    if (!isLoggedIn) {
+    if (!auth.loggedIn) {
         btnLogin.style.display = 'block';
         btnRegister.style.display = 'block';
         btnLogout.style.display = 'none';
+        if (btnEditProfile) btnEditProfile.classList.add('oculto');
 
         // ✨ CORRECCIÓN 1: Si intentan entrar a /create-league sin sesión, los echa al /login
         if (rutaActual === '/' || rutaActual === '') {
@@ -63,6 +72,10 @@ async function evaluarRuta() {
         btnRegister.style.display = 'none';
         btnLogout.style.display = 'block';
 
+        if (btnEditProfile) {
+            btnEditProfile.textContent = auth.username;
+            btnEditProfile.classList.remove('oculto');
+        }
         // Si está logueado y va a la raíz, al login o al registro, lo mandamos a /hola
         if (rutaActual === '/' || rutaActual === '') {
             window.history.replaceState({}, '', '/hola');
@@ -77,6 +90,10 @@ async function evaluarRuta() {
         }
         else if (rutaActual === '/join-league'){
             return renderJoinLeague();
+        }
+        else if (rutaActual === '/edit-account'){
+            if (btnEditProfile) btnEditProfile.classList.add('activo');
+            return renderEditAccount();
         }
         else{
             window.history.replaceState({}, '', '/hola');
@@ -107,6 +124,14 @@ document.getElementById('btn-register').addEventListener('click', () => {
     window.history.pushState({}, '', '/register');
     evaluarRuta();
 });
+
+const btnEditProfile = document.getElementById('btn-edit-profile');
+if (btnEditProfile) {
+    btnEditProfile.addEventListener('click', () => {
+        window.history.pushState({}, '', '/edit-account');
+        evaluarRuta();
+    });
+}
 
 document.getElementById('btn-logout').addEventListener('click', async () => {
     try {
