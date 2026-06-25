@@ -27,8 +27,8 @@ const leagueController = {
         }
 
         const { name, inv_code } = req.body;
-        if (!name || !inv_code) {
-            return res.status(400).json({ error: 'League name and invitation code are required' });
+        if (!name) {
+            return res.status(400).json({ error: 'League name is required' });
         }
 
         try {
@@ -60,8 +60,8 @@ const leagueController = {
             return res.status(401).json({ error: 'Non authorized. Log in first' });
         }
         const { name, inv_code } = req.body;
-        if(!name || !inv_code){
-            return res.status(400).json({error: 'League name and invitation code are required'});
+        if(!name){
+            return res.status(400).json({error: 'League name is required'});
         }
         try{
             const cookieValue = req.cookies.auth_session;
@@ -69,6 +69,9 @@ const leagueController = {
             const league = await LeagueModel.findByName(name);
             if(!league){
                 return res.status(400).json({ error: 'Wrong name or invitation code' });
+            }
+            if(await LeagueModel.isInProgress(league.league_id)){
+                return res.status(400).json({ error: 'This league has already started'});
             }
             const isParticipant = await LeagueModel.isParticipant(userId, league.league_id);
             if(isParticipant){

@@ -63,6 +63,12 @@ const LeagueModel = {
         const query = 'SELECT * FROM Participants WHERE user_id = $1 AND league_id = $2';
         const result = await pool.query(query, [userId, leagueId]);
         return result.rows[0];
+    },
+
+    isInProgress: async (leagueId) => {
+        const query = 'SELECT in_progress FROM Leagues WHERE league_id = $1';
+        const result = await pool.query(query, [leagueId]);
+        return result.rows[0].in_progress;
     }
 };
 

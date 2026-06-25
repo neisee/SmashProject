@@ -61,6 +61,11 @@ export function renderJoinLeague() {
 
             leagueForm.reset();
 
+            setTimeout(() => {
+                window.history.pushState({}, '', '/hola');
+                window.dispatchEvent(new Event('popstate')); // Forzamos al router a cambiar de vista
+            }, 1000);
+            
         } catch (error) {
             errorDiv.textContent = error.message;
             errorDiv.classList.remove('oculto');
