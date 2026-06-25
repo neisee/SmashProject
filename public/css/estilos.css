@@ -326,3 +326,43 @@ body {
 .btn-profile:active {
     transform: scale(0.97);    /* Efecto de pulsación */
 }
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; 
+    /* Quitamos las transiciones de opacidad aquí si causan conflicto con el display: none */
+}
+
+/* Contenedor de la modal (reutilizando tus estilos de formulario) */
+.modal-content.auth-container {
+    max-width: 400px;
+    width: 90%;
+    margin-top: 0; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    color: white;
+}
+
+.modal-content p {
+    color: #ccc;
+    margin-bottom: 25px;
+}
+
+/* Contenedor de los botones */
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}

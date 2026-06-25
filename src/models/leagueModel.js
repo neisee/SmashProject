@@ -69,6 +69,30 @@ const LeagueModel = {
         const query = 'SELECT in_progress FROM Leagues WHERE league_id = $1';
         const result = await pool.query(query, [leagueId]);
         return result.rows[0].in_progress;
+    },
+
+    findById: async (leagueId) => {
+        const query = 'SELECT * FROM Leagues WHERE league_id = $1';
+        const result = await pool.query(query, [leagueId]);
+        return result.rows[0];
+    },
+
+    getParticipants: async (leagueId) => {
+        // Hacemos un INNER JOIN para sacar el username real desde la tabla Users
+        const query = `
+            SELECT u.user_id, u.username 
+            FROM Participants p
+            INNER JOIN Users u ON p.user_id = u.user_id
+            WHERE p.league_id = $1
+        `;
+        const result = await pool.query(query, [leagueId]);
+        return result.rows; // Devuelve el array completo de filas
+    },
+
+    removeParticipant: async (leagueId, userId) => {
+        // Ajusta 'Participants' al nombre exacto de tu tabla intermedia
+        const query = 'DELETE FROM Participants WHERE league_id = $1 AND user_id = $2';
+        await pool.query(query, [leagueId, userId]);
     }
 };
 

@@ -17,5 +17,7 @@ router.put('/auth/update-account', authController.updateAccount);
 router.get('/leagues', leagueController.getLeagues);
 router.post('/auth/create-league', leagueController.createLeague);
 router.post('/auth/join-league', leagueController.joinLeague);
+router.get('/leagues/:id/details', leagueController.getLeagueDetails);
+router.post('/leagues/kick', leagueController.kickParticipant);
 
 module.exports = router;

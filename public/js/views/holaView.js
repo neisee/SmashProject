@@ -26,17 +26,27 @@ export async function renderHola() {
         </div>
     `;
 
-    // 2. Escuchas de eventos para los nuevos botones (de momento imprimen en consola)
+    // 2. Escuchas de eventos para los nuevos botones
     document.getElementById('btn-create-league').addEventListener('click', () => {
-        // Cambiamos la URL de la barra de navegación a '/create-league'
         window.history.pushState({}, '', '/create-league');
-        // Le avisamos a tu enrutador (router) que la URL cambió para que pinte la nueva vista
         window.dispatchEvent(new Event('popstate'));
     });
 
     document.getElementById('btn-join-league').addEventListener('click', () => {
         window.history.pushState({}, '', '/join-league');
         window.dispatchEvent(new Event('popstate'));
+    });
+
+    // 🆕 NUEVO: Escucha de eventos mediante DELEGACIÓN en el contenedor padre de las ligas
+    document.getElementById('leagues-list').addEventListener('click', (e) => {
+        // Buscamos si el elemento clickeado o alguno de sus padres tiene la clase 'league-card'
+        const card = e.target.closest('.league-card');
+        if (card) {
+            const leagueId = card.getAttribute('data-id');
+            // Redirigimos a la ruta dinámica que configuramos en tu router
+            window.history.pushState({}, '', `/league/${leagueId}`);
+            window.dispatchEvent(new Event('popstate'));
+        }
     });
 
     // 3. Disparamos la carga inicial de la primera liga
@@ -59,7 +69,6 @@ async function fetchLeagues() {
     }
 
     try {
-        // Hacemos la petición pasando las variables con nombres en inglés al backend
         const response = await fetch(`/api/leagues?limit=${LEAGUE_LIMIT}&offset=${currentOffset}`);
         const leaguesData = await response.json();
 
@@ -79,12 +88,12 @@ async function fetchLeagues() {
             leaguesListContainer.innerHTML = '';
         }
 
-        // Mapeamos las ligas recibidas. Nota que las propiedades de la DB también van en inglés
+        // 🔄 MODIFICADO: Añadida la clase 'league-card', el data-id y estilos hover/pointer
         const leaguesHtml = leaguesData.map(league => `
-            <div style="background: #1a1a1a; padding: 15px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #333;">
-                <h3 style="margin-top: 0;">${league.name}</h3>
-                <p style="margin: 5px 0;">👤 Creator: <strong>${league.creador}</strong></p>
-                <p style="margin: 5px 0;">🔑 Code: <code>${league.invitation_code}</code></p>
+            <div class="league-card" data-id="${league.league_id}" style="background: #1a1a1a; padding: 15px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #333; cursor: pointer; transition: transform 0.2s, border-color 0.2s;" onmouseover="this.style.borderColor='#4caf50'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='#333'; this.style.transform='translateY(0)'">
+                <h3 style="margin-top: 0; color: white;">${league.name}</h3>
+                <p style="margin: 5px 0; color: #ccc;">👤 Creator: <strong>${league.creador}</strong></p>
+                <p style="margin: 5px 0; color: #ccc;">🔑 Code: <code>${league.invitation_code}</code></p>
                 <span style="font-size: 14px; color: ${league.in_progress ? '#ff9800' : '#4caf50'}">
                     ${league.in_progress ? '⏳ In progress' : '🟢 Open registrations'}
                 </span>

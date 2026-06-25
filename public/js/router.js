@@ -4,6 +4,7 @@ import { renderLogin } from './views/loginView.js';
 import { renderCreateLeague } from './views/createLeagueView.js';
 import { renderJoinLeague } from './views/joinLeagueView.js';
 import { renderEditAccount } from './views/editAccountView.js';
+import { renderLeagueDetails } from './views/leagueDetailsView.js';
 
 // Nueva función auxiliar para consultar la cookie al servidor
 async function checkAuthStatus() {
@@ -94,6 +95,18 @@ async function evaluarRuta() {
         else if (rutaActual === '/edit-account'){
             if (btnEditProfile) btnEditProfile.classList.add('activo');
             return renderEditAccount();
+        }
+        else if (rutaActual.startsWith('/league/')) {
+            const leagueId = rutaActual.split('/league/')[1];
+            
+            // Si no hay ID o no es un número válido, lo mandamos a /hola
+            if (!leagueId || isNaN(leagueId)) {
+                window.history.replaceState({}, '', '/hola');
+                return renderHola();
+            }
+            
+            // Carga los detalles de la liga pasándole su ID
+            return renderLeagueDetails(leagueId);
         }
         else{
             window.history.replaceState({}, '', '/hola');

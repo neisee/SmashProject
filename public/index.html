@@ -26,5 +26,16 @@
     <div id="vista-principal" class="contenedor"></div>
 
     <script type="module" src="/js/router.js"></script>
+    <div id="custom-confirm-modal" class="modal-overlay oculto">
+        <div class="modal-content auth-container">
+            <h3 id="confirm-modal-title">Confirm Action</h3>
+            <p id="confirm-modal-message">Are you sure you want to proceed?</p>
+            
+            <div class="modal-actions">
+                <button id="confirm-modal-cancel" class="btn-nav">Cancel</button>
+                <button id="confirm-modal-accept" class="btn-nav btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
