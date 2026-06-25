@@ -40,8 +40,8 @@ const leagueController = {
                 return res.status(400).json({ error: 'League name is already taken' });
             }
 
-            if (inv_code.length > 8) {
-                return res.status(400).json({ error: 'Invitation Code cannot be longer than 8 characters.' });
+            if (inv_code.length > 128) {
+                return res.status(400).json({ error: 'Invitation Code cannot be longer than 128 characters.' });
             }
 
             const newLeagueId = await LeagueModel.createLeagueWithParticipant(name, inv_code, creatorId);

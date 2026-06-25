@@ -12,7 +12,7 @@ export function renderCreateLeague() {
                 </div>
                 <div class="form-group">
                     <label for="league-inv-code">Invitation Code</label>
-                    <input type="text" id="league-inv-code" required autocomplete="off" maxlength="8">
+                    <input type="text" id="league-inv-code" required autocomplete="off" maxlength="128">
                 </div>
                 <div id="league-error" class="error-msg oculto"></div>
                 <div id="league-success" class="success-msg oculto">League Successfully Created</div>
