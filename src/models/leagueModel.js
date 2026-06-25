@@ -1,3 +1,4 @@
+const { joinLeague } = require('../controllers/leagueController');
 const pool = require('./db');
 
 const LeagueModel = {
@@ -44,6 +45,24 @@ const LeagueModel = {
         );
 
         return newLeagueId;
+    },
+
+    findByNameAndCode: async (name, inv_code) => {
+        const query = 'SELECT * FROM Leagues WHERE LOWER(name) = LOWER($1) AND invitation_code = $2';
+        const result = await pool.query(query, [name, inv_code]);
+        return result.rows[0];
+    },
+
+    joinLeague: async (userId, leagueId) => {
+        const query = 'INSERT INTO Participants(league_id, user_id) VALUES ($1, $2) RETURNING *';
+        const result = await pool.query(query, [leagueId, userId]);
+        return result.rows[0];
+    },
+
+    isParticipant: async (userId, leagueId) => {
+        const query = 'SELECT * FROM Participants WHERE user_id = $1 AND league_id = $2';
+        const result = await pool.query(query, [userId, leagueId]);
+        return result.rows[0];
     }
 };
 

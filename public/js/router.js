@@ -2,6 +2,7 @@ import { renderHola } from './views/holaView.js';
 import { renderRegister } from './views/registerView.js';
 import { renderLogin } from './views/loginView.js';
 import { renderCreateLeague } from './views/createLeagueView.js';
+import { renderJoinLeague } from './views/joinLeagueView.js';
 
 // Nueva función auxiliar para consultar la cookie al servidor
 async function checkAuthStatus() {
@@ -73,6 +74,9 @@ async function evaluarRuta() {
         }
         else if (rutaActual === '/create-league'){
             return renderCreateLeague();
+        }
+        else if (rutaActual === '/join-league'){
+            return renderJoinLeague();
         }
         else{
             window.history.replaceState({}, '', '/hola');

@@ -35,7 +35,8 @@ export async function renderHola() {
     });
 
     document.getElementById('btn-join-league').addEventListener('click', () => {
-        console.log("Opening join league prompt...");
+        window.history.pushState({}, '', '/join-league');
+        window.dispatchEvent(new Event('popstate'));
     });
 
     // 3. Disparamos la carga inicial de la primera liga

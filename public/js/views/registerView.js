@@ -73,7 +73,7 @@ export function renderRegister() {
             setTimeout(() => {
                 window.history.pushState({}, '', '/login');
                 window.dispatchEvent(new Event('popstate')); // Forzamos al router a cambiar de vista
-            }, 1500);
+            }, 1000);
 
         } catch (error) {
             errorDiv.textContent = `${error.message}`;

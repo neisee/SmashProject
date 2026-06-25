@@ -15,5 +15,6 @@ router.post('/auth/logout', authController.logout);
 // Rutas de Ligas
 router.get('/leagues', leagueController.getLeagues);
 router.post('/auth/create-league', leagueController.createLeague);
+router.post('/auth/join-league', leagueController.joinLeague);
 
 module.exports = router;
