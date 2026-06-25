@@ -93,6 +93,41 @@ const LeagueModel = {
         // Ajusta 'Participants' al nombre exacto de tu tabla intermedia
         const query = 'DELETE FROM Participants WHERE league_id = $1 AND user_id = $2';
         await pool.query(query, [leagueId, userId]);
+    },
+
+    getParticipantsIds: async (leagueId) => {
+        const query = 'SELECT user_id FROM Participants WHERE league_id = $1';
+        const { rows } = await pool.query(query, [leagueId]);
+        
+        // Mapeamos para devolver un array simple de números [1, 4, 12...] en vez de un array de objetos
+        return rows.map(row => row.user_id);
+    },
+
+    createRound: async (leagueId) => {
+        const query = 'INSERT INTO Rounds(league_id, round_number) VALUES ($1, 0) RETURNING round_id';
+        const { rows } = await pool.query(query, [leagueId]);
+        return rows[0].round_id;
+    },
+
+    createMatch: async (player1, player2, leagueId, roundId) => {
+        const query = 'INSERT INTO Matches(player1, player2, league_id, round_id) VALUES ($1, $2, $3, $4)';
+        await pool.query(query, [player1, player2, leagueId, roundId]);
+    },
+
+    updateInProgress: async (leagueId, status) => {
+        const query = 'UPDATE Leagues SET in_progress = $1 WHERE league_id = $2';
+        await pool.query(query, [status, leagueId]);
+    },
+
+    updateRoundNumber: async (roundId, newNumber)=> {
+        const query = 'UPDATE Rounds SET round_number = $1 WHERE round_id = $2';
+        await pool.query(query, [newNumber, roundId]);
+    },
+
+    getAllRoundsId: async (leagueId) => {
+        const query = 'SELECT round_id FROM Rounds WHERE league_id = $1';
+        const { rows } = await pool.query(query, [leagueId]);
+        return rows.map(row => row.round_id);
     }
 };
 

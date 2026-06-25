@@ -116,32 +116,33 @@ export async function renderLeagueDetails(leagueId) {
                     }
                 }
             });
-        }
-        document.getElementById('btn-start-league').addEventListener('click', async () => {
-            const confirmado = await mostrarConfirmacionModal(
-                'Start Tournament', 
-                'Are you sure you want to start the league? No more players will be able to join.'
-            );
+            document.getElementById('btn-start-league').addEventListener('click', async () => {
+                const confirmado = await mostrarConfirmacionModal(
+                    'Start Tournament', 
+                    'Are you sure you want to start the league? No more players will be able to join.'
+                );
 
-            if (confirmado) {
-                try {
-                    const res = await fetch(`/api/leagues/${leagueId}/start`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
+                if (confirmado) {
+                    try {
+                        const res = await fetch(`/api/leagues/${leagueId}/start`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
 
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.error || 'Error starting league');
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || 'Error starting league');
 
-                    // Refrescamos para aplicar el cambio de estado
-                    renderLeagueDetails(leagueId);
+                        // Refrescamos para aplicar el cambio de estado
+                        window.history.pushState({}, '', '/hola');
+                        window.dispatchEvent(new Event('popstate'));
+                        return;
 
-                } catch (err) {
-                    alert(err.message);
+                    } catch (err) {
+                        alert(err.message);
+                    }
                 }
-            }
-        });
-
+            });
+        }
     } catch (error) {
         // ... (Manejo de errores - se mantiene igual)
     }
