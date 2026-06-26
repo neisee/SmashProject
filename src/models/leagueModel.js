@@ -1,4 +1,3 @@
-const { joinLeague } = require('../controllers/leagueController');
 const pool = require('./db');
 
 const LeagueModel = {
