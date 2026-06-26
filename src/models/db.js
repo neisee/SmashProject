@@ -2,15 +2,15 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Creamos el pool pasándole directamente la URL de conexión completa
+// Detectamos si estamos en Render (producción) o en nuestra PC (desarrollo)
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false // Esto evita fallos con los certificados SSL de Render/Supabase
-    }
+    // 🌟 Si está en Render usa SSL, si está en Docker local lo desactiva
+    ssl: isProduction ? { rejectUnauthorized: false } : false
 });
 
-// Pequeño test de conexión al arrancar
 pool.query('SELECT NOW()', (err, res) => {
     if (err) {
         console.error('❌ Error al conectar a PostgreSQL:', err.stack);
