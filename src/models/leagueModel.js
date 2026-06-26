@@ -77,15 +77,43 @@ const LeagueModel = {
     },
 
     getParticipants: async (leagueId) => {
-        // Hacemos un INNER JOIN para sacar el username real desde la tabla Users
         const query = `
-            SELECT u.user_id, u.username 
-            FROM Participants p
-            INNER JOIN Users u ON p.user_id = u.user_id
-            WHERE p.league_id = $1
+            SELECT 
+                u.user_id,
+                u.username,
+                -- Contar victorias
+                COALESCE(SUM(CASE 
+                    WHEN (m.player1 = u.user_id AND m.lives_player1 > m.lives_player2) OR 
+                        (m.player2 = u.user_id AND m.lives_player2 > m.lives_player1) THEN 1 
+                    ELSE 0 
+                END), 0) AS wins,
+                -- Contar derrotas
+                COALESCE(SUM(CASE 
+                    WHEN (m.player1 = u.user_id AND m.lives_player1 < m.lives_player2) OR 
+                        (m.player2 = u.user_id AND m.lives_player2 < m.lives_player1) THEN 1 
+                    ELSE 0 
+                END), 0) AS losses,
+                -- Sumar vidas a favor
+                COALESCE(SUM(CASE 
+                    WHEN m.player1 = u.user_id THEN m.lives_player1 
+                    WHEN m.player2 = u.user_id THEN m.lives_player2 
+                    ELSE 0 
+                END), 0) AS lives_won,
+                -- Sumar vidas en contra
+                COALESCE(SUM(CASE 
+                    WHEN m.player1 = u.user_id THEN m.lives_player2 
+                    WHEN m.player2 = u.user_id THEN m.lives_player1 
+                    ELSE 0 
+                END), 0) AS lives_against
+            FROM Participants pt
+            JOIN Users u ON pt.user_id = u.user_id
+            LEFT JOIN Matches m ON (m.player1 = u.user_id OR m.player2 = u.user_id) AND m.league_id = $1
+            WHERE pt.league_id = $1
+            GROUP BY u.user_id, u.username;
         `;
-        const result = await pool.query(query, [leagueId]);
-        return result.rows; // Devuelve el array completo de filas
+        
+        const { rows } = await pool.query(query, [leagueId]);
+        return rows;
     },
 
     removeParticipant: async (leagueId, userId) => {
@@ -127,6 +155,23 @@ const LeagueModel = {
         const query = 'SELECT round_id FROM Rounds WHERE league_id = $1';
         const { rows } = await pool.query(query, [leagueId]);
         return rows.map(row => row.round_id);
+    },
+
+    getPlayedMatches: async (leagueId) => {
+        const queryMatches = `
+            SELECT player1, player2, lives_player1, lives_player2 
+            FROM Matches 
+            WHERE league_id = $1 
+              AND lives_player1 IS NOT NULL 
+              AND lives_player2 IS NOT NULL
+        `;
+        try {
+            const { rows } = await pool.query(queryMatches, [leagueId]);
+            return rows;
+        } catch (error) {
+            console.error('Error en LeagueModel.getPlayedMatches:', error);
+            throw error;
+        }
     }
 };
 

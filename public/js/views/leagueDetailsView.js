@@ -7,7 +7,7 @@ export async function renderLeagueDetails(leagueId) {
     contenedor.innerHTML = `<div class="hola-texto">Loading league details...</div>`;
 
     try {
-        const respuesta = await fetch(`/api/leagues/${leagueId}/details`);
+        const respuesta = await fetch(`/api/leagues/${leagueId}/details?_=${new Date().getTime()}`);
         const datos = await respuesta.json();
 
         if (!respuesta.ok) {
@@ -17,14 +17,14 @@ export async function renderLeagueDetails(leagueId) {
         const { league, participants, isCreator } = datos;
 
         if (league.in_progress) {
-            // ... (Código de bloqueo si está en progreso - se mantiene igual)
-            contenedor.innerHTML = `<div class="auth-container"><h2>${league.name}</h2><div class="error-msg">In progress.</div></div>`;
+            // 🔥 Respetamos el orden oficial exacto que viene del servidor con las miniligas
+            renderActiveLeagueDetails(leagueId, datos); 
             return;
         }
 
         const currentUserText = document.getElementById('btn-edit-profile')?.textContent || '';
 
-        participants.sort((a, b) => a.username.localeCompare(b.username, 'es', { sensitivity: 'base' }));
+        // 💥 BORRADO: Ya no se fuerza el sort por username en fase de espera. Se muestra tal y como llega.
 
         contenedor.innerHTML = `
             <div class="auth-container" style="max-width: 500px;">
@@ -83,7 +83,6 @@ export async function renderLeagueDetails(leagueId) {
             window.dispatchEvent(new Event('popstate'));
         });
 
-        // ESCUCHA DE EVENTOS PARA EXPULSAR (Modificada para usar la modal)
         if (isCreator) {
             document.getElementById('participants-list').addEventListener('click', async (e) => {
                 const kickBtn = e.target.closest('.btn-kick');
@@ -92,12 +91,9 @@ export async function renderLeagueDetails(leagueId) {
                 const userIdToKick = kickBtn.getAttribute('data-user-id');
                 const usernameToKick = kickBtn.getAttribute('data-username');
 
-                // 🔥 CAMBIO AQUÍ 🔥
-                // Reemplazamos confirm() por nuestra función personalizada y asíncrona
                 const mensaje = `Are you sure you want to remove <strong>${usernameToKick}</strong> from the league?`;
                 const confirmado = await mostrarConfirmacionModal('Kick Player', mensaje);
 
-                // La ejecución se pausa aquí hasta que el usuario pulse en la modal
                 if (confirmado) {
                     try {
                         const res = await fetch('/api/leagues/kick', {
@@ -109,13 +105,14 @@ export async function renderLeagueDetails(leagueId) {
                         const data = await res.json();
                         if (!res.ok) throw new Error(data.error || 'Error kicking player');
 
-                        renderLeagueDetails(leagueId); // Recargar la vista
+                        renderLeagueDetails(leagueId);
 
                     } catch (err) {
-                        alert(err.message); // O usa una modal de error bonita también
+                        await mostrarErrorModal('Error Removing Player', err.message);
                     }
                 }
             });
+
             document.getElementById('btn-start-league').addEventListener('click', async () => {
                 const confirmado = await mostrarConfirmacionModal(
                     'Start Tournament', 
@@ -132,59 +129,146 @@ export async function renderLeagueDetails(leagueId) {
                         const data = await res.json();
                         if (!res.ok) throw new Error(data.error || 'Error starting league');
 
-                        // Refrescamos para aplicar el cambio de estado
                         window.history.pushState({}, '', '/hola');
                         window.dispatchEvent(new Event('popstate'));
                         return;
 
                     } catch (err) {
-                        alert(err.message);
+                        await mostrarErrorModal('Error Starting Tournament', err.message);
                     }
                 }
             });
         }
     } catch (error) {
-        // ... (Manejo de errores - se mantiene igual)
+        await mostrarErrorModal('Loading Error', error.message);
+        contenedor.innerHTML = `<div class="auth-container"><div class="error-msg">Could not load league info.</div></div>`;
     }
 }
 
-// --- 🆕 FUNCIÓN AUXILIAR DE LA MODAL (Lógica de Promesas) ---
+// --- MODALES DE CONFIRMACIÓN Y ERROR (Sin cambios) ---
 function mostrarConfirmacionModal(titulo, mensaje) {
     return new Promise((resolve) => {
-        // Seleccionamos los elementos de la modal (que añadimos al index.html)
         const modal = document.getElementById('custom-confirm-modal');
         const tituloEl = document.getElementById('confirm-modal-title');
         const mensajeEl = document.getElementById('confirm-modal-message');
         const btnAceptar = document.getElementById('confirm-modal-accept');
         const btnCancelar = document.getElementById('confirm-modal-cancel');
 
-        // 1. Rellenamos el texto dinámico
         tituloEl.textContent = titulo;
-        mensajeEl.innerHTML = mensaje; // Usamos innerHTML por si queremos negritas
-
-        // 2. Mostramos la modal quitando la clase 'oculto'
+        mensajeEl.innerHTML = mensaje;
         modal.classList.remove('oculto');
 
-        // 3. Definimos funciones de limpieza para los eventos (para evitar duplicados)
         const limpiarEventos = () => {
             btnAceptar.removeEventListener('click', payloadAceptar);
             btnCancelar.removeEventListener('click', payloadCancelar);
-            modal.classList.add('oculto'); // Ocultar al terminar
+            modal.classList.add('oculto');
         };
 
-        // 4. Definimos qué pasa al pulsar los botones (resuelven la promesa)
         const payloadAceptar = () => {
             limpiarEventos();
-            resolve(true); // El usuario confirmó
+            resolve(true);
         };
 
         const payloadCancelar = () => {
             limpiarEventos();
-            resolve(false); // El usuario canceló
+            resolve(false);
         };
 
-        // 5. Añadimos los escuchas de clicks
         btnAceptar.addEventListener('click', payloadAceptar);
         btnCancelar.addEventListener('click', payloadCancelar);
+    });
+}
+
+function mostrarErrorModal(titulo, mensaje) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('custom-confirm-modal');
+        const tituloEl = document.getElementById('confirm-modal-title');
+        const mensajeEl = document.getElementById('confirm-modal-message');
+        const btnAceptar = document.getElementById('confirm-modal-accept');
+        const btnCancelar = document.getElementById('confirm-modal-cancel');
+
+        tituloEl.textContent = titulo;
+        tituloEl.style.color = '#ff6b6b';
+        mensajeEl.innerHTML = mensaje;
+        btnAceptar.textContent = 'Aceptar';
+        btnCancelar.style.display = 'none';
+        modal.classList.remove('oculto');
+
+        const limpiarEventos = () => {
+            btnAceptar.removeEventListener('click', payloadAceptar);
+            modal.classList.add('oculto');
+            btnCancelar.style.display = 'inline-block';
+            tituloEl.style.color = ''; 
+            btnAceptar.textContent = 'Confirm'; 
+        };
+
+        const payloadAceptar = () => {
+            limpiarEventos();
+            resolve();
+        };
+
+        btnAceptar.addEventListener('click', payloadAceptar);
+    });
+}
+
+// --- VISTA LIVE ORDENADA DIRECTAMENTE POR TU BACKEND RECURSIVO ---
+export function renderActiveLeagueDetails(leagueId, datos) {
+    const contenedor = document.getElementById('vista-principal');
+    const { league, participants } = datos;
+
+    // 💥 BORRADO EL .SORT(): Ahora respeta escrupulosamente el orden del backend (wins, losses, miniligas...)
+
+    contenedor.innerHTML = `
+        <div class="auth-container" style="max-width: 580px;">
+            <h2 style="margin-bottom: 5px;">${league.name}</h2>
+            <p style="text-align: center; color: #ff6b6b; font-size: 14px; margin-top: 0; margin-bottom: 20px; font-weight: bold;">
+                🔴 League in Progress (Tournament Live)
+            </p>
+
+            <div class="form-group">
+                <label style="font-weight: bold; color: white; margin-bottom: 10px;">
+                    Official Standings (${participants.length} Players)
+                </label>
+                
+                <ul id="active-participants-list" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
+                    ${participants.map((p, index) => {
+                        // Extraemos las estadísticas calculadas por el backend
+                        const diffVidas = (p.lives_won || 0) - (p.lives_against || 0);
+                        const stringVidas = diffVidas >= 0 ? `+${diffVidas}` : `${diffVidas}`;
+                        const colorVidas = diffVidas >= 0 ? '#4feb52' : '#ff6b6b';
+
+                        return `
+                        <li style="background-color: #242424; border: 1px solid #333; padding: 10px 14px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span style="font-size: 13px; color: #ff6b6b; margin-right: 8px; font-weight: bold;">#${index + 1}</span>
+                                <span style="font-weight: 500; color: #e0e0e0;">${p.username}</span>
+                            </div>
+                            <div style="font-size: 12px; color: #aaa; display: flex; gap: 14px; align-items: center;">
+                                <span>Record: <b style="color: white; font-size: 13px;">${p.wins || 0}-${p.losses || 0}</b></span>
+                                <span>Lives: <b style="color: ${colorVidas}; font-size: 13px;">${stringVidas}</b></span>
+                            </div>
+                        </li>
+                        `;
+                    }).join('')}
+                </ul>
+            </div>
+
+            <div id="seccion-partidos" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
+                <p style="color: #666; text-align: center; font-style: italic; font-size: 14px;">
+                    🕒 Matches will be loaded here soon...
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 20px;">
+                <button id="btn-back-active" class="btn-auth" style="background-color: #242424; color: white; border: 1px solid #444; margin: 0; flex: 1;">
+                    Back to Dashboard
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('btn-back-active').addEventListener('click', () => {
+        window.history.pushState({}, '', '/hola');
+        window.dispatchEvent(new Event('popstate'));
     });
 }

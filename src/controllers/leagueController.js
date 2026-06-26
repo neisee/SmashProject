@@ -105,7 +105,7 @@ const leagueController = {
             const league = await LeagueModel.findById(id);
             if (!league) return res.status(404).json({ error: 'League not found.' });
 
-            const participants = await LeagueModel.getParticipants(id);
+            let participants = await LeagueModel.getParticipants(id);
 
             const isParticipant = participants.some(p => p.user_id === currentUserId);
             if (!isParticipant) {
@@ -114,6 +114,162 @@ const leagueController = {
 
             // 💥 AQUÍ ESTÁ LA CLAVE: Comparamos IDs numéricos en el servidor
             const isCreator = (league.creator_id === currentUserId);
+
+            if (league.in_progress) {
+                // 1. Nos traemos TODOS los partidos jugados de la liga una sola vez para no saturar la BD
+                const playedMatches = await LeagueModel.getPlayedMatches(id);
+
+                // 2. Definimos la función mágica de desempate por bloques
+                async function ordenarBloque(grupo) {
+                    if (grupo.length <= 1) return grupo;
+
+                    // Si el grupo tiene exactamente 2 jugadores -> Criterio 3 (Partido Directo)
+                    if (grupo.length === 2) {
+                        const [a, b] = grupo;
+                        const directMatch = playedMatches.find(m => 
+                            (m.player1 === a.user_id && m.player2 === b.user_id) ||
+                            (m.player1 === b.user_id && m.player2 === a.user_id)
+                        );
+
+                        if (directMatch) {
+                            let winnerId = null;
+                            if (directMatch.lives_player1 > directMatch.lives_player2) winnerId = directMatch.player1;
+                            else if (directMatch.lives_player2 > directMatch.lives_player1) winnerId = directMatch.player2;
+
+                            if (winnerId === a.user_id) return [a, b];
+                            if (winnerId === b.user_id) return [b, a];
+                        }
+                        // Si no hay partido directo o dio empate, desempatamos por nombre (Criterio 4)
+                        return [a, b].sort((x, y) => x.username.localeCompare(y.username, 'es', { sensitivity: 'base' }));
+                    }
+
+                    // Si el grupo tiene 3 o más jugadores -> Criterio 3 (Miniliga)
+                    if (grupo.length >= 3) {
+                        const idsGrupo = grupo.map(p => p.user_id);
+                        
+                        // Calculamos cuántos partidos DEBERÍAN haberse jugado en esta miniliga: N * (N - 1) / 2
+                        const partidosTeoricos = (grupo.length * (grupo.length - 1)) / 2;
+
+                        // Filtramos los partidos donde AMBOS jugadores pertenecen a este grupo de empate
+                        const partidosMiniliga = playedMatches.filter(m => 
+                            idsGrupo.includes(m.player1) && idsGrupo.includes(m.player2)
+                        );
+
+                        // Si no se han jugado todos los partidos de la miniliga, se cancela y pasamos al criterio 4 (alfabético)
+                        if (partidosMiniliga.length !== partidosTeoricos) {
+                            return grupo.sort((x, y) => x.username.localeCompare(y.username, 'es', { sensitivity: 'base' }));
+                        }
+
+                        // Inicializamos un marcador de estadísticas exclusivo para la miniliga
+                        const statsMiniliga = {};
+                        grupo.forEach(p => {
+                            statsMiniliga[p.user_id] = { wins: 0, losses: 0, lives_won: 0, lives_against: 0 };
+                        });
+
+                        // Computamos los datos SOLO de los partidos de la miniliga
+                        partidosMiniliga.forEach(m => {
+                            const p1 = statsMiniliga[m.player1];
+                            const p2 = statsMiniliga[m.player2];
+
+                            p1.lives_won += m.lives_player1;
+                            p1.lives_against += m.lives_player2;
+                            p2.lives_won += m.lives_player2;
+                            p2.lives_against += m.lives_player1;
+
+                            if (m.lives_player1 > m.lives_player2) {
+                                p1.wins += 1;
+                                p2.losses += 1;
+                            } else {
+                                p2.wins += 1;
+                                p1.losses += 1;
+                            }
+                        });
+
+                        // Ordenamos el grupo según los criterios 1 y 2 recalculados en la miniliga
+                        grupo.sort((a, b) => {
+                            const sA = statsMiniliga[a.user_id];
+                            const sB = statsMiniliga[b.user_id];
+
+                            const netWinsA = sA.wins - sA.losses;
+                            const netWinsB = sB.wins - sB.losses;
+                            if (netWinsB !== netWinsA) return netWinsB - netWinsA;
+
+                            const livesDifA = sA.lives_won - sA.lives_against;
+                            const livesDifB = sB.lives_won - sB.lives_against;
+                            if (livesDifB !== livesDifA) return livesDifB - livesDifA;
+
+                            return 0; // Siguen empatados en la miniliga
+                        });
+
+                        // 🔥 RECURSIVIDAD COMPLETA:
+                        // Volvemos a agrupar por si la miniliga rompió algunos empates pero dejó otros activos
+                        return await procesarGrupos(grupo, statsMiniliga);
+                    }
+                }
+
+                // Auxiliar para subdividir y aplicar las reglas recursivamente si quedan empates parciales
+                async function procesarGrupos(lista, statsReferencia = null) {
+                    const subGrupos = [];
+                    let grupoActual = [lista[0]];
+
+                    for (let i = 1; i < lista.length; i++) {
+                        const a = lista[i - 1];
+                        const b = lista[i];
+
+                        let estanEmpatados = false;
+
+                        if (statsReferencia) {
+                            // Si venimos de una miniliga, comparamos basándonos en las estadísticas de la miniliga
+                            const sA = statsReferencia[a.user_id];
+                            const sB = statsReferencia[b.user_id];
+                            estanEmpatados = (sA.wins - sA.losses === sB.wins - sB.losses) && 
+                                            (sA.lives_won - sA.lives_against === sB.lives_won - sB.lives_against);
+                        } else {
+                            // Si es la primera pasada global, comparamos con las estadísticas generales de la liga
+                            estanEmpatados = ((a.wins || 0) - (a.losses || 0) === (b.wins || 0) - (b.losses || 0)) &&
+                                            (((a.lives_won || 0) - (a.lives_against || 0)) === ((b.lives_won || 0) - (b.lives_against || 0)));
+                        }
+
+                        if (estanEmpatados) {
+                            grupoActual.push(b);
+                        } else {
+                            subGrupos.push(grupoActual);
+                            grupoActual = [b];
+                        }
+                    }
+                    subGrupos.push(grupoActual);
+
+                    // Procesamos cada subgrupo de manera independiente y unimos los resultados ordenados
+                    let resultadoFinal = [];
+                    for (const subGrupo of subGrupos) {
+                        // Si el subgrupo sigue empatado tras una miniliga y no se puede romper más, tiramos de alfabeto
+                        if (statsReferencia && subGrupo.length > 1) {
+                            subGrupo.sort((x, y) => x.username.localeCompare(y.username, 'es', { sensitivity: 'base' }));
+                            resultadoFinal = resultadoFinal.concat(subGrupo);
+                        } else {
+                            const grupoOrdenado = await ordenarBloque(subGrupo);
+                            resultadoFinal = resultadoFinal.concat(grupoOrdenado);
+                        }
+                    }
+                    return resultadoFinal;
+                }
+                let listaParaOrdenar = [...participants];
+                // 3. EJECUCIÓN: Ordenación global inicial por criterios 1 y 2 básicos
+                listaParaOrdenar.sort((a, b) => {
+                    const netWinsA = (a.wins || 0) - (a.losses || 0);
+                    const netWinsB = (b.wins || 0) - (b.losses || 0);
+                    if (netWinsB !== netWinsA) return netWinsB - netWinsA;
+
+                    const livesDifA = (a.lives_won || 0) - (a.lives_against || 0);
+                    const livesDifB = (b.lives_won || 0) - (b.lives_against || 0);
+                    if (livesDifB !== livesDifA) return livesDifB - livesDifA;
+
+                    return 0;
+                });
+
+                // Lanzamos el procesador recursivo para resolver los empates que hayan quedado de la lista global
+                participants = await procesarGrupos(listaParaOrdenar);
+            }
 
             return res.status(200).json({
                 league,
@@ -220,7 +376,7 @@ const leagueController = {
             console.error('Error starting league:', error);
             return res.status(500).json({ error: 'Server error.' });
         }
-    }
+    },
 };
 
 module.exports = leagueController;
