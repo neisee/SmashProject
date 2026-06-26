@@ -219,63 +219,80 @@ export function renderActiveLeagueDetails(leagueId, datos) {
     let tarjetaPartidoHTML = `
         <div style="background-color: #1f1f1f; border: 1px dashed #444; border-radius: 8px; padding: 15px; text-align: center;">
             <p style="color: #aaa; font-style: italic; font-size: 14px; margin: 0;">
-                🕒 No upcoming matches found or you are not participating in this league.
+                🕒 No upcoming matches found
             </p>
         </div>
     `;
 
     // Procesamos el partido si existe
     if (nextMatch) {
-        // 1. Buscamos los nombres reales de la DB basándonos estrictamente en el orden del partido
-        const p1Obj = participants.find(p => p.user_id === nextMatch.player1);
-        const p2Obj = participants.find(p => p.user_id === nextMatch.player2);
+        const esByeRound = (nextMatch.player1 === null || nextMatch.player2 === null);
 
-        const p1Name = p1Obj ? p1Obj.username : 'Unknown';
-        const p2Name = p2Obj ? p2Obj.username : 'Unknown';
-
-        // 2. Añadimos etiquetas visuales "(You)" para saber quién es quién, sin alterar el orden del HTML
-        const p1Label = (p1Name === currentUserText) ? ' <span style="color:#4caf50; font-size:11px;">(You)</span>' : '';
-        const p2Label = (p2Name === currentUserText) ? ' <span style="color:#4caf50; font-size:11px;">(You)</span>' : '';
-
-        tarjetaPartidoHTML = `
-            <div style="background: linear-gradient(135deg, #2b2b2b 0%, #1f1f1f 100%); border: 2px solid #ff6b6b; border-radius: 8px; padding: 16px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-                <span style="background-color: #ff6b6b; color: #121212; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 20px; text-transform: uppercase;">
-                    Round ${nextMatch.round_number} • Match Center
-                </span>
-                
-                <div style="display: flex; justify-content: center; align-items: flex-start; gap: 20px; margin-top: 15px;">
-                    <div style="flex: 1; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-                        <span style="font-size: 16px; font-weight: bold; color: #e0e0e0;">${p1Name}${p1Label}</span>
-                        <input type="number" id="score-player1" min="0" max="99" placeholder="Lives" 
-                               style="width: 60px; background-color: #121212; border: 1px solid #444; color: white; padding: 6px; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; margin-top: 4px; appearance: textfield; -moz-appearance: textfield; -webkit-appearance: none;">
-                    </div>
-                    
-                    <div style="font-size: 18px; font-weight: bold; color: #ff6b6b; font-style: italic; margin-top: 4px;">VS</div>
-                    
-                    <div style="flex: 1; text-align: left; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;">
-                        <span style="font-size: 16px; font-weight: bold; color: #e0e0e0;">${p2Name}${p2Label}</span>
-                        <input type="number" id="score-player2" min="0" max="99" placeholder="Lives" 
-                               style="width: 60px; background-color: #121212; border: 1px solid #444; color: white; padding: 6px; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; margin-top: 4px; appearance: textfield; -moz-appearance: textfield; -webkit-appearance: none;">
-                    </div>
-                </div>
-                
-                <button id="btn-post-result" 
-                        data-p1-id="${nextMatch.player1}" 
-                        data-p2-id="${nextMatch.player2}"
-                        style="margin-top: 18px; width: 100%; background-color: #ff6b6b; color: #121212; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
-                    🚀 Post Result
-                </button>
-            </div>
-        `;
-    } else {
-        // Si nextMatch explícitamente llegó null del backend pero el jugador está en la lista
-        const esParticipante = participants.some(p => p.username === currentUserText);
-        if (esParticipante) {
+        if (esByeRound) {
+            // --- TARJETA ESPECIAL: JORNADA DE DESCANSO (BYE ROUND) ---
             tarjetaPartidoHTML = `
-                <div style="background-color: #1a231a; border: 1px dashed #4caf50; border-radius: 8px; padding: 15px; text-align: center;">
-                    <p style="color: #4caf50; font-weight: 500; margin: 0; font-size: 14px;">
-                        ✅ You have played all your available matches for now!
-                    </p>
+                <div style="background: linear-gradient(135deg, #1f2421 0%, #161a18 100%); border: 2px dashed #4caf50; border-radius: 8px; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                    <span style="background-color: #4caf50; color: #121212; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 20px; text-transform: uppercase;">
+                        Round ${nextMatch.round_number} • Bye Round
+                    </span>
+                    
+                    <div style="margin-top: 20px; margin-bottom: 20px;">
+                        <h3 style="color: #4caf50; margin: 0 0 5px 0; font-size: 18px;">🏠 It's your Rest Round!</h3>
+                        <p style="color: #aaa; font-size: 13px; margin: 0; line-height: 1.4;">
+                            You don't have an opponent assigned for this round.<br>
+                            You can advance directly to the next round.
+                        </p>
+                    </div>
+                    
+                    <button id="btn-skip-bye" 
+                            data-p1-id="${nextMatch.player1 || ''}" 
+                            data-p2-id="${nextMatch.player2 || ''}"
+                            style="width: 100%; background-color: #4caf50; color: #121212; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s;"
+                            onmouseover="this.style.backgroundColor='#66bb6a'" 
+                            onmouseout="this.style.backgroundColor='#4caf50'">
+                        Next Round ➡️
+                    </button>
+                </div>
+            `;
+        } else {
+            // --- TARJETA NORMAL: ENFRENTAMIENTO CONTRA RIVAL REAL (Izquierda = P1 DB, Derecha = P2 DB) ---
+            const p1Obj = participants.find(p => p.user_id === nextMatch.player1);
+            const p2Obj = participants.find(p => p.user_id === nextMatch.player2);
+
+            const p1Name = p1Obj ? p1Obj.username : 'Unknown';
+            const p2Name = p2Obj ? p2Obj.username : 'Unknown';
+
+            const p1Label = (p1Name === currentUserText) ? ' <span style="color:#4caf50; font-size:11px;">(You)</span>' : '';
+            const p2Label = (p2Name === currentUserText) ? ' <span style="color:#4caf50; font-size:11px;">(You)</span>' : '';
+
+            tarjetaPartidoHTML = `
+                <div style="background: linear-gradient(135deg, #2b2b2b 0%, #1f1f1f 100%); border: 2px solid #ff6b6b; border-radius: 8px; padding: 16px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                    <span style="background-color: #ff6b6b; color: #121212; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 20px; text-transform: uppercase;">
+                        Round ${nextMatch.round_number} • Match Center
+                    </span>
+                    
+                    <div style="display: flex; justify-content: center; align-items: flex-start; gap: 20px; margin-top: 15px;">
+                        <div style="flex: 1; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                            <span style="font-size: 16px; font-weight: bold; color: #e0e0e0;">${p1Name}${p1Label}</span>
+                            <input type="number" id="score-player1" min="0" max="99" placeholder="Lives" 
+                                   style="width: 60px; background-color: #121212; border: 1px solid #444; color: white; padding: 6px; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; margin-top: 4px; appearance: textfield; -moz-appearance: textfield; -webkit-appearance: none;">
+                        </div>
+                        
+                        <div style="font-size: 18px; font-weight: bold; color: #ff6b6b; font-style: italic; margin-top: 4px;">VS</div>
+                        
+                        <div style="flex: 1; text-align: left; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;">
+                            <span style="font-size: 16px; font-weight: bold; color: #e0e0e0;">${p2Name}${p2Label}</span>
+                            <input type="number" id="score-player2" min="0" max="99" placeholder="Lives" 
+                                   style="width: 60px; background-color: #121212; border: 1px solid #444; color: white; padding: 6px; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; margin-top: 4px; appearance: textfield; -moz-appearance: textfield; -webkit-appearance: none;">
+                        </div>
+                    </div>
+                    
+                    <button id="btn-post-result" 
+                            data-p1-id="${nextMatch.player1}" 
+                            data-p2-id="${nextMatch.player2}"
+                            style="margin-top: 18px; width: 100%; background-color: #ff6b6b; color: #121212; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
+                        🚀 Post Result
+                    </button>
                 </div>
             `;
         }
@@ -320,12 +337,37 @@ export function renderActiveLeagueDetails(leagueId, datos) {
                         const stringVidas = diffVidas >= 0 ? `+${diffVidas}` : `${diffVidas}`;
                         const colorVidas = diffVidas >= 0 ? '#4feb52' : '#ff6b6b';
                         const esUsuarioActual = p.username === currentUserText;
+                        
+                        // 👑 ESTILOS EXCLUSIVOS PARA EL TOP DE LA LIGA (AMARILLO #1, VERDE FUERTE #2) 🟡
+                        const esNumeroUno = (index === 0);
+                        const esNumeroDos = (index === 1);
+                        const esNaranjaTop = (index >= 2 && index <= 4);
+                        
+                        // 🚨 NUEVO: Detectamos si está entre los 4 últimos basándonos en el total de participantes
+                        const esCuatroUltimos = (index >= participants.length - 4);
+                        
+                        // Respetamos el color del Top 5 si hay solapamiento. Si no, aplicamos Rojo (#ff3333) a los últimos.
+                        const esRojoFinal = esCuatroUltimos && !esNumeroUno && !esNumeroDos && !esNaranjaTop;
 
+                        // Definimos el color del texto del número "#X"
+                        const colorRankingText = esNumeroUno ? '#ffd700' : (esNumeroDos ? '#00e676' : (esNaranjaTop ? '#ff9100' : (esRojoFinal ? '#ff3333' : '#ff6b6b')));
+                        
+                        // Definimos el color del nombre del jugador
+                        const colorNombre = esNumeroUno ? '#ffd700' : (esNumeroDos ? '#00e676' : (esNaranjaTop ? '#ff9100' : (esRojoFinal ? '#ff3333' : (esUsuarioActual ? '#4caf50' : '#e0e0e0'))));
+                        
+                        // Prefijo de texto
+                        const prefijoRank = esNumeroUno ? '#1' : (esNumeroDos ? '#2' : (index === 2 ? '#3' : `#${index + 1}`));
+                        
+                        // Ponemos en negrita el Top 5 y también la zona de descenso (los últimos)
+                        const fuentePeso = (esNumeroUno || esNumeroDos || esNaranjaTop || esRojoFinal) ? 'bold' : '500';
+                        
+                        // Color para el borde de la caja
+                        const colorBorde = esNumeroUno ? '#ffd700' : (esNumeroDos ? '#00e676' : (esNaranjaTop ? '#ff9100' : (esRojoFinal ? '#ff3333' : (esUsuarioActual ? '#4caf50' : '#333'))));
                         return `
-                        <li style="background-color: ${esUsuarioActual ? '#1e291e' : '#242424'}; border: 1px solid ${esUsuarioActual ? '#4caf50' : '#333'}; padding: 10px 14px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <li style="background-color: ${esUsuarioActual ? '#1e291e' : '#242424'}; border: 1px solid ${colorBorde}; padding: 10px 14px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <span style="font-size: 13px; color: #ff6b6b; margin-right: 8px; font-weight: bold;">#${index + 1}</span>
-                                <span style="font-weight: 500; color: ${esUsuarioActual ? '#4caf50' : '#e0e0e0'};">${p.username}</span>
+                                <span style="font-size: 13px; color: ${colorRankingText}; margin-right: 8px; font-weight: bold;">${prefijoRank}</span>
+                                <span style="font-weight: ${fuentePeso}; color: ${colorNombre};">${p.username}</span>
                                 ${esUsuarioActual ? '<span style="font-size: 11px; color: #4caf50; margin-left: 5px;">(You)</span>' : ''}
                             </div>
                             <div style="font-size: 12px; color: #aaa; display: flex; gap: 14px; align-items: center;">
@@ -354,10 +396,10 @@ export function renderActiveLeagueDetails(leagueId, datos) {
     const btnPostResult = document.getElementById('btn-post-result');
     if (btnPostResult) {
         btnPostResult.addEventListener('click', async () => {
-            const livesLeftInput = document.getElementById('score-player1').value;  // El de la izquierda (Tú)
-            const livesRightInput = document.getElementById('score-player2').value; // El de la derecha (Rival)
+            const livesP1 = document.getElementById('score-player1').value; // Izquierda (P1 DB)
+            const livesP2 = document.getElementById('score-player2').value; // Derecha (P2 DB)
 
-            if (livesLeftInput === '' || livesRightInput === '') {
+            if (livesP1 === '' || livesP2 === '') {
                 await mostrarErrorModal('Missing Scores', 'Please enter the score/lives for both players.');
                 return;
             }
@@ -365,47 +407,61 @@ export function renderActiveLeagueDetails(leagueId, datos) {
             const confirmado = await mostrarConfirmacionModal('Submit Result', 'Are you sure you want to save this score?');
             if (!confirmado) return;
 
-            // 🎯 AQUÍ ESTÁ EL TRUCO MÁGICO:
-            // Recuperamos los IDs reales que guardamos en los atributos data-* del botón
-            const p1IdIdDb = btnPostResult.getAttribute('data-p1-id'); // El Player 1 real en la DB
-            const p2IdIdDb = btnPostResult.getAttribute('data-p2-id'); // El Player 2 real en la DB
-
-            // Averiguamos tu ID real en base a la lista de participantes
-            const currentUserObj = participants.find(p => p.username === currentUserText);
-            const currentUserId = currentUserObj ? currentUserObj.user_id : null;
-
-            let finalLivesP1, finalLivesP2;
-
-            // Si TÚ eres el player1 en la base de datos...
-            if (Number(currentUserId) === Number(p1IdIdDb)) {
-                finalLivesP1 = parseInt(livesLeftInput, 10);  // Tus vidas van al Player 1
-                finalLivesP2 = parseInt(livesRightInput, 10); // Las del rival van al Player 2
-            } else {
-                // Si TÚ eres el player2 en la base de datos... ¡Los cruzamos!
-                finalLivesP1 = parseInt(livesRightInput, 10); // Las del rival (derecha) van al Player 1
-                finalLivesP2 = parseInt(livesLeftInput, 10);  // Tus vidas (izquierda) van al Player 2
-            }
-
             try {
                 const res = await fetch(`/api/leagues/${leagueId}/matches/result`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        player1Id: p1IdIdDb,
-                        player2Id: p2IdIdDb,
-                        livesPlayer1: finalLivesP1, // Enviados correctamente según la DB
-                        livesPlayer2: finalLivesP2  // Enviados correctamente según la DB
+                        player1Id: btnPostResult.getAttribute('data-p1-id'),
+                        player2Id: btnPostResult.getAttribute('data-p2-id'),
+                        livesPlayer1: parseInt(livesP1, 10), // Envío directo mapeado con la vista estricta
+                        livesPlayer2: parseInt(livesP2, 10)  // Envío directo mapeado con la vista estricta
                     })
                 });
 
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'Error saving result');
 
-                // Recargamos la vista
-                renderLeagueDetails(leagueId);
+                // Llamamos a la función principal para que pida los nuevos datos al servidor y repinte
+                if (typeof renderLeagueDetails === 'function') {
+                    renderLeagueDetails(leagueId);
+                } else {
+                    window.location.reload(); // Copia de seguridad si no está global
+                }
 
             } catch (err) {
                 await mostrarErrorModal('Submission Error', err.message);
+            }
+        });
+    }
+
+    const btnSkipBye = document.getElementById('btn-skip-bye');
+    if (btnSkipBye) {
+        btnSkipBye.addEventListener('click', async () => {
+            try {
+                const res = await fetch(`/api/leagues/${leagueId}/matches/result`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        player1Id: btnSkipBye.getAttribute('data-p1-id') || null,
+                        player2Id: btnSkipBye.getAttribute('data-p2-id') || null,
+                        livesPlayer1: 0,
+                        livesPlayer2: 0
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Error skipping bye round');
+
+                // Llamamos a la función principal para que pida los nuevos datos al servidor y repinte
+                if (typeof renderLeagueDetails === 'function') {
+                    renderLeagueDetails(leagueId);
+                } else {
+                    window.location.reload(); // Copia de seguridad si no está global
+                }
+
+            } catch (err) {
+                await mostrarErrorModal('Error advancing round', err.message);
             }
         });
     }

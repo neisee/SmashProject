@@ -383,7 +383,6 @@ const leagueController = {
     },
 
     updateMatchResult: async (req, res) => {
-        // 🛡️ Tu misma comprobación de cookies de seguridad
         if (!req.cookies || !req.cookies.auth_session) {
             return res.status(401).json({ error: 'Unauthorized: No session cookie found.' });
         }
@@ -392,12 +391,11 @@ const leagueController = {
         const { player1Id, player2Id, livesPlayer1, livesPlayer2 } = req.body;
 
         try {
-            // Validamos que los marcadores no vengan vacíos
             if (livesPlayer1 === undefined || livesPlayer2 === undefined) {
                 return res.status(400).json({ error: 'Missing scores for players.' });
             }
 
-            // Consumimos el Model de forma limpia
+            // Llamamos al método del modelo que procesa la query dinámica
             const actualizado = await LeagueModel.updateMatchScore(
                 leagueId, 
                 player1Id, 

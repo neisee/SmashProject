@@ -214,17 +214,34 @@ const LeagueModel = {
     },
 
     updateMatchScore: async (leagueId, player1Id, player2Id, livesPlayer1, livesPlayer2) => {
-        const query = `
-            UPDATE Matches 
-            SET lives_player1 = $1, lives_player2 = $2
-            WHERE league_id = $3 
-              AND player1 = $4 
-              AND player2 = $5
-              AND lives_player1 IS NULL 
-              AND lives_player2 IS NULL
-        `;
-        const { rowCount } = await pool.query(query, [livesPlayer1, livesPlayer2, leagueId, player1Id, player2Id]);
-        return rowCount > 0; // Devuelve true si se actualizó el partido, false si no
+        const isP1Null = (!player1Id || player1Id === 'null');
+        const isP2Null = (!player2Id || player2Id === 'null');
+
+        let query = `UPDATE Matches SET lives_player1 = $1, lives_player2 = $2 WHERE league_id = $3`;
+        const params = [livesPlayer1, livesPlayer2, leagueId];
+
+        // Condición para Player 1
+        if (isP1Null) {
+            query += ` AND player1 IS NULL`;
+        } else {
+            params.push(player1Id);
+            query += ` AND player1 = $${params.length}`;
+        }
+
+        // Condición para Player 2
+        if (isP2Null) {
+            query += ` AND player2 IS NULL`;
+        } else {
+            params.push(player2Id);
+            query += ` AND player2 = $${params.length}`;
+        }
+
+        // Evitamos sobreescribir partidos ya jugados
+        query += ` AND lives_player1 IS NULL AND lives_player2 IS NULL`;
+
+        // Aquí sí está definido pool
+        const { rowCount } = await pool.query(query, params);
+        return rowCount > 0;
     }
 };
 
