@@ -366,3 +366,15 @@ body {
     gap: 15px;
     justify-content: center;
 }
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Para Firefox (Estándar moderno) */
+input[type=number] {
+  appearance: none;
+  -moz-appearance: none; /* Por si acaso da soporte a versiones muy viejas, pero ya acepta 'none' */
+}

@@ -115,6 +115,8 @@ const leagueController = {
             // 💥 AQUÍ ESTÁ LA CLAVE: Comparamos IDs numéricos en el servidor
             const isCreator = (league.creator_id === currentUserId);
 
+            let nextMatch = null;
+
             if (league.in_progress) {
                 // 1. Nos traemos TODOS los partidos jugados de la liga una sola vez para no saturar la BD
                 const playedMatches = await LeagueModel.getPlayedMatches(id);
@@ -243,7 +245,7 @@ const leagueController = {
                     let resultadoFinal = [];
                     for (const subGrupo of subGrupos) {
                         // Si el subgrupo sigue empatado tras una miniliga y no se puede romper más, tiramos de alfabeto
-                        if (statsReferencia && subGrupo.length > 1) {
+                        if (statsReferencia && subGrupo.length === lista.length) {
                             subGrupo.sort((x, y) => x.username.localeCompare(y.username, 'es', { sensitivity: 'base' }));
                             resultadoFinal = resultadoFinal.concat(subGrupo);
                         } else {
@@ -269,12 +271,14 @@ const leagueController = {
 
                 // Lanzamos el procesador recursivo para resolver los empates que hayan quedado de la lista global
                 participants = await procesarGrupos(listaParaOrdenar);
+                nextMatch = await LeagueModel.getNextMatchForUser(id, currentUserId);
             }
 
             return res.status(200).json({
                 league,
                 participants,
-                isCreator // 👈 Enviamos este booleano limpio al frontend
+                isCreator, // 👈 Enviamos este booleano limpio al frontend
+                nextMatch
             });
 
         } catch (error) {
@@ -377,6 +381,42 @@ const leagueController = {
             return res.status(500).json({ error: 'Server error.' });
         }
     },
+
+    updateMatchResult: async (req, res) => {
+        // 🛡️ Tu misma comprobación de cookies de seguridad
+        if (!req.cookies || !req.cookies.auth_session) {
+            return res.status(401).json({ error: 'Unauthorized: No session cookie found.' });
+        }
+
+        const { leagueId } = req.params;
+        const { player1Id, player2Id, livesPlayer1, livesPlayer2 } = req.body;
+
+        try {
+            // Validamos que los marcadores no vengan vacíos
+            if (livesPlayer1 === undefined || livesPlayer2 === undefined) {
+                return res.status(400).json({ error: 'Missing scores for players.' });
+            }
+
+            // Consumimos el Model de forma limpia
+            const actualizado = await LeagueModel.updateMatchScore(
+                leagueId, 
+                player1Id, 
+                player2Id, 
+                livesPlayer1, 
+                livesPlayer2
+            );
+
+            if (!actualizado) {
+                return res.status(404).json({ error: 'Match not found or score already recorded.' });
+            }
+
+            return res.status(200).json({ message: 'Result updated successfully!' });
+
+        } catch (error) {
+            console.error('Error in updateMatchResult:', error);
+            return res.status(500).json({ error: 'Internal server error saving the score.' });
+        }
+    }
 };
 
 module.exports = leagueController;

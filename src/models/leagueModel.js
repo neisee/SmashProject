@@ -172,6 +172,59 @@ const LeagueModel = {
             console.error('Error en LeagueModel.getPlayedMatches:', error);
             throw error;
         }
+    },
+
+    getMatchesWithRounds: async (leagueId) => {
+        const query = `
+            SELECT 
+                m.id, 
+                m.player1, 
+                m.player2, 
+                m.lives_player1, 
+                m.lives_player2, 
+                r.round_number
+            FROM Matches m
+            JOIN Rounds r ON m.round_id = r.round_id
+            WHERE m.league_id = $1
+            ORDER BY r.round_number ASC
+        `;
+        const { rows } = await pool.query(query, [leagueId]);
+        return rows;
+    },
+
+    getNextMatchForUser: async (leagueId, userId) => {
+        const query = `
+            SELECT 
+                m.player1, 
+                m.player2, 
+                m.lives_player1, 
+                m.lives_player2, 
+                r.round_number
+            FROM Matches m
+            JOIN Rounds r ON m.round_id = r.round_id
+            WHERE m.league_id = $1 
+              AND ($2 IN (m.player1, m.player2))
+              AND m.lives_player1 IS NULL 
+              AND m.lives_player2 IS NULL
+            ORDER BY r.round_number ASC
+            LIMIT 1
+        `;
+        const { rows } = await pool.query(query, [leagueId, userId]);
+        return rows[0] || null; // Devuelve el objeto del partido o null si no hay
+    },
+
+    updateMatchScore: async (leagueId, player1Id, player2Id, livesPlayer1, livesPlayer2) => {
+        const query = `
+            UPDATE Matches 
+            SET lives_player1 = $1, lives_player2 = $2
+            WHERE league_id = $3 
+              AND player1 = $4 
+              AND player2 = $5
+              AND lives_player1 IS NULL 
+              AND lives_player2 IS NULL
+        `;
+        const { rowCount } = await pool.query(query, [livesPlayer1, livesPlayer2, leagueId, player1Id, player2Id]);
+        return rowCount > 0; // Devuelve true si se actualizó el partido, false si no
     }
 };
 
