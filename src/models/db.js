@@ -2,12 +2,12 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
+// Creamos el pool pasándole directamente la URL de conexión completa
 const pool = new Pool({
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    database: process.env.DB_NAME,
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false // Esto evita fallos con los certificados SSL de Render/Supabase
+    }
 });
 
 // Pequeño test de conexión al arrancar
