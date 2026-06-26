@@ -339,30 +339,27 @@ export function renderActiveLeagueDetails(leagueId, datos) {
                         const esUsuarioActual = p.username === currentUserText;
                         
                         // 👑 ESTILOS EXCLUSIVOS PARA EL TOP DE LA LIGA (AMARILLO #1, VERDE FUERTE #2) 🟡
-                        const esNumeroUno = (index === 0);
-                        const esNumeroDos = (index === 1);
-                        const esNaranjaTop = (index >= 2 && index <= 4);
+                        const esVerdeTop = (index === 0 || index === 1);  // Posiciones 1 y 2
+                        const esAmarilloTop = (index >= 2 && index <= 4); // Posiciones 3, 4 y 5
+                        const esCuatroUltimos = (index >= participants.length - 4); // Últimos 4
                         
-                        // 🚨 NUEVO: Detectamos si está entre los 4 últimos basándonos en el total de participantes
-                        const esCuatroUltimos = (index >= participants.length - 4);
-                        
-                        // Respetamos el color del Top 5 si hay solapamiento. Si no, aplicamos Rojo (#ff3333) a los últimos.
-                        const esRojoFinal = esCuatroUltimos && !esNumeroUno && !esNumeroDos && !esNaranjaTop;
+                        // Protección anti-solapamiento para ligas pequeñas
+                        const esRojoFinal = esCuatroUltimos && !esVerdeTop && !esAmarilloTop;
 
                         // Definimos el color del texto del número "#X"
-                        const colorRankingText = esNumeroUno ? '#ffd700' : (esNumeroDos ? '#00e676' : (esNaranjaTop ? '#ff9100' : (esRojoFinal ? '#ff3333' : '#ff6b6b')));
+                        const colorRankingText = esVerdeTop ? '#00e676' : (esAmarilloTop ? '#ffd700' : (esRojoFinal ? '#ff3333' : '#ff6b6b'));
                         
                         // Definimos el color del nombre del jugador
-                        const colorNombre = esNumeroUno ? '#ffd700' : (esNumeroDos ? '#00e676' : (esNaranjaTop ? '#ff9100' : (esRojoFinal ? '#ff3333' : (esUsuarioActual ? '#4caf50' : '#e0e0e0'))));
+                        const colorNombre = esVerdeTop ? '#00e676' : (esAmarilloTop ? '#ffd700' : (esRojoFinal ? '#ff3333' : (esUsuarioActual ? '#4caf50' : '#e0e0e0')));
                         
-                        // Prefijo de texto
-                        const prefijoRank = esNumeroUno ? '#1' : (esNumeroDos ? '#2' : (index === 2 ? '#3' : `#${index + 1}`));
+                        // Prefijo de texto limpio sin coronas ni medallas
+                        const prefijoRank = `#${index + 1}`;
                         
-                        // Ponemos en negrita el Top 5 y también la zona de descenso (los últimos)
-                        const fuentePeso = (esNumeroUno || esNumeroDos || esNaranjaTop || esRojoFinal) ? 'bold' : '500';
+                        // Ponemos en negrita el texto destacado (Tops y últimos)
+                        const fuentePeso = (esVerdeTop || esAmarilloTop || esRojoFinal) ? 'bold' : '500';
                         
                         // Color para el borde de la caja
-                        const colorBorde = esNumeroUno ? '#ffd700' : (esNumeroDos ? '#00e676' : (esNaranjaTop ? '#ff9100' : (esRojoFinal ? '#ff3333' : (esUsuarioActual ? '#4caf50' : '#333'))));
+                        const colorBorde = esVerdeTop ? '#00e676' : (esAmarilloTop ? '#ffd700' : (esRojoFinal ? '#ff3333' : (esUsuarioActual ? '#4caf50' : '#333')));
                         return `
                         <li style="background-color: ${esUsuarioActual ? '#1e291e' : '#242424'}; border: 1px solid ${colorBorde}; padding: 10px 14px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
                             <div>
