@@ -5,6 +5,7 @@ import { renderCreateLeague } from './views/createLeagueView.js';
 import { renderJoinLeague } from './views/joinLeagueView.js';
 import { renderEditAccount } from './views/editAccountView.js';
 import { renderLeagueDetails } from './views/leagueDetailsView.js';
+import { renderEditPlayedMatches } from './views/editPlayedMatchesView.js';
 
 // Auxiliar para consultar la cookie al servidor
 async function checkAuthStatus() {
@@ -90,6 +91,15 @@ async function evaluarRuta() {
         else if (rutaActual === '/edit-account'){
             if (btnEditProfile) btnEditProfile.classList.add('activo');
             return renderEditAccount();
+        }
+        else if (rutaActual.startsWith('/league/') && rutaActual.endsWith('/edit-matches')) {
+            const leagueId = rutaActual.split('/league/')[1].split('/edit-matches')[0];
+            
+            if (!leagueId || isNaN(leagueId)) {
+                window.history.replaceState({}, '', '/hola');
+                return renderHola();
+            }
+            return renderEditPlayedMatches(leagueId);
         }
         else if (rutaActual.startsWith('/league/')) {
             const leagueId = rutaActual.split('/league/')[1];

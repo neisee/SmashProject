@@ -20,6 +20,7 @@ router.post('/auth/join-league', leagueController.joinLeague);
 router.get('/leagues/:id/details', leagueController.getLeagueDetails);
 router.post('/leagues/kick', leagueController.kickParticipant);
 router.put('/leagues/:id/start', leagueController.startLeague);
+router.get('/leagues/:leagueId/matches', leagueController.getLeagueMatches);
 router.put('/leagues/:leagueId/matches/result', leagueController.updateMatchResult);
 
 module.exports = router;

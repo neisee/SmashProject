@@ -382,6 +382,24 @@ const leagueController = {
         }
     },
 
+    getLeagueMatches: async (req, res) => {
+        if (!req.cookies || !req.cookies.auth_session) {
+            return res.status(401).json({ error: 'Unauthorized: No session cookie found.' });
+        }
+
+        const { leagueId } = req.params;
+        const cookieValue = req.cookies.auth_session;
+        const currentUserId = parseInt(cookieValue.split('logged_in_user_')[1], 10);
+
+        try {
+            const matches = await LeagueModel.getLeagueMatches(leagueId, currentUserId);
+            return res.status(200).json({ matches });
+        } catch (error) {
+            console.error('Error in getLeagueMatches:', error);
+            return res.status(500).json({ error: 'Internal server error loading matches.' });
+        }
+    },
+
     updateMatchResult: async (req, res) => {
         if (!req.cookies || !req.cookies.auth_session) {
             return res.status(401).json({ error: 'Unauthorized: No session cookie found.' });
@@ -404,7 +422,7 @@ const leagueController = {
             );
 
             if (!actualizado) {
-                return res.status(404).json({ error: 'Match not found or score already recorded.' });
+                return res.status(404).json({ error: 'Match not found' });
             }
 
             // 🔥 CLAVE: Recuperamos la función de forma segura desde req.app sin imports circulares

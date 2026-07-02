@@ -159,6 +159,9 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
                 <button id="btn-back-active" class="btn-auth" style="background-color: #242424; color: white; border: 1px solid #444; margin: 0; flex: 1;">
                     Back to Dashboard
                 </button>
+                <button id="btn-edit-matches" class="btn-auth" style="background-color: #ff6b6b; color: #121212; border: none; font-weight: bold; margin: 0; flex: 1;">
+                    ⚙️ Edit Played Matches
+                </button>
             </div>
         </div>
     `;
@@ -196,6 +199,12 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
         }
     };
 
+    const limpiarSocket = () => {
+        if (window.activeLeagueSocket) {
+            window.activeLeagueSocket.close();
+            window.activeLeagueSocket = null;
+        }
+    };
     // --- MANEJO DE EVENTOS DE BOTONES ---
     document.getElementById('btn-back-active').addEventListener('click', () => {
         // 🔥 Limpieza del socket antes de cambiar de vista
@@ -204,6 +213,13 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
             window.activeLeagueSocket = null;
         }
         window.history.pushState({}, '', '/hola');
+        window.dispatchEvent(new Event('popstate'));
+    });
+
+    document.getElementById('btn-edit-matches').addEventListener('click', () => {
+        limpiarSocket();
+        // Cambiamos la URL de forma SPA hacia la nueva vista de edición
+        window.history.pushState({}, '', `/league/${leagueId}/edit-matches`);
         window.dispatchEvent(new Event('popstate'));
     });
 

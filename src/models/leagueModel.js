@@ -192,6 +192,29 @@ const LeagueModel = {
         return rows;
     },
 
+    getLeagueMatches: async (leagueId, currentUserId) => {
+        const query = `
+            SELECT 
+                m.id,
+                m.player1,
+                m.player2,
+                m.lives_player1,
+                m.lives_player2,
+                r.round_number,
+                u1.username AS player1_name,
+                u2.username AS player2_name
+            FROM Matches m
+            LEFT JOIN Rounds r ON m.round_id = r.round_id
+            LEFT JOIN Users u1 ON m.player1 = u1.user_id
+            LEFT JOIN Users u2 ON m.player2 = u2.user_id
+            WHERE m.league_id = $1
+              AND ($2 IN (m.player1, m.player2))
+            ORDER BY r.round_number ASC, m.id ASC
+        `;
+        const { rows } = await pool.query(query, [leagueId, currentUserId]);
+        return rows;
+    },
+
     getNextMatchForUser: async (leagueId, userId) => {
         const query = `
             SELECT 
@@ -235,9 +258,6 @@ const LeagueModel = {
             params.push(player2Id);
             query += ` AND player2 = $${params.length}`;
         }
-
-        // Evitamos sobreescribir partidos ya jugados
-        query += ` AND lives_player1 IS NULL AND lives_player2 IS NULL`;
 
         // Aquí sí está definido pool
         const { rowCount } = await pool.query(query, params);
