@@ -22,6 +22,14 @@ async function checkAuthStatus() {
 }
 
 async function evaluarRuta() {
+    // 🔥 CLAVE: Si el usuario cambia de ruta (por clics, historial o popstate),
+    // cerramos inmediatamente el WebSocket activo para evitar conexiones fantasmas.
+    if (window.activeLeagueSocket) {
+        console.log('🔌 Limpiando WebSocket remanente desde el Router...');
+        window.activeLeagueSocket.close();
+        window.activeLeagueSocket = null;
+    }
+
     const rutaActual = window.location.pathname;
     const auth = await checkAuthStatus();
 
@@ -95,7 +103,6 @@ async function evaluarRuta() {
         }
         else {
             window.history.replaceState({}, '', '/hola');
-            // Corregido: Ya no añadimos la clase activa a Login cuando estamos logueados y en una ruta desconocida
             return renderHola();
         }
     }

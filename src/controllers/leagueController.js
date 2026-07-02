@@ -395,7 +395,6 @@ const leagueController = {
                 return res.status(400).json({ error: 'Missing scores for players.' });
             }
 
-            // Llamamos al método del modelo que procesa la query dinámica
             const actualizado = await LeagueModel.updateMatchScore(
                 leagueId, 
                 player1Id, 
@@ -406,6 +405,16 @@ const leagueController = {
 
             if (!actualizado) {
                 return res.status(404).json({ error: 'Match not found or score already recorded.' });
+            }
+
+            // 🔥 CLAVE: Recuperamos la función de forma segura desde req.app sin imports circulares
+            const broadcastToLeague = req.app.get('broadcastToLeague');
+            
+            if (typeof broadcastToLeague === 'function') {
+                broadcastToLeague(leagueId, {
+                    event: 'match-updated',
+                    leagueId: leagueId
+                });
             }
 
             return res.status(200).json({ message: 'Result updated successfully!' });

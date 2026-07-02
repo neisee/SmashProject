@@ -163,7 +163,46 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
         </div>
     `;
 
+    // --- 📡 CONEXIÓN WEBSOCKET EN TIEMPO REAL ---
+    if (window.activeLeagueSocket) {
+        window.activeLeagueSocket.close();
+    }
+
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const socketUrl = `${protocol}${window.location.host}`;
+    const ws = new WebSocket(socketUrl);
+    window.activeLeagueSocket = ws;
+
+    ws.onopen = () => {
+        ws.send(JSON.stringify({
+            type: 'join-league',
+            leagueId: String(leagueId)
+        }));
+    };
+
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.event === 'match-updated' && String(data.leagueId) === String(leagueId)) {
+                console.log('⚡ Actualización detectada. Refrescando datos...');
+                if (typeof onRefresh === 'function') {
+                    onRefresh();
+                } else {
+                    window.location.reload();
+                }
+            }
+        } catch (err) {
+            console.error('Error procesando mensaje de WebSocket:', err);
+        }
+    };
+
+    // --- MANEJO DE EVENTOS DE BOTONES ---
     document.getElementById('btn-back-active').addEventListener('click', () => {
+        // 🔥 Limpieza del socket antes de cambiar de vista
+        if (window.activeLeagueSocket) {
+            window.activeLeagueSocket.close();
+            window.activeLeagueSocket = null;
+        }
         window.history.pushState({}, '', '/hola');
         window.dispatchEvent(new Event('popstate'));
     });
@@ -197,7 +236,6 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'Error saving result');
 
-                // Ejecutamos el callback seguro pasado por el componente padre
                 if (typeof onRefresh === 'function') {
                     onRefresh();
                 } else {
