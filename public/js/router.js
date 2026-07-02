@@ -6,13 +6,12 @@ import { renderJoinLeague } from './views/joinLeagueView.js';
 import { renderEditAccount } from './views/editAccountView.js';
 import { renderLeagueDetails } from './views/leagueDetailsView.js';
 
-// Nueva función auxiliar para consultar la cookie al servidor
+// Auxiliar para consultar la cookie al servidor
 async function checkAuthStatus() {
     try {
         const respuesta = await fetch('/api/auth/status');
         const datos = await respuesta.json();
         
-        // Devolvemos un objeto con el estado y el nombre
         return { 
             loggedIn: datos.loggedIn, 
             username: datos.user?.username || 'Cuenta' 
@@ -22,7 +21,6 @@ async function checkAuthStatus() {
     }
 }
 
-// Convertimos evaluarRuta en una función ASYNC
 async function evaluarRuta() {
     const rutaActual = window.location.pathname;
     const auth = await checkAuthStatus();
@@ -44,14 +42,8 @@ async function evaluarRuta() {
         btnLogout.style.display = 'none';
         if (btnEditProfile) btnEditProfile.classList.add('oculto');
 
-        // ✨ CORRECCIÓN 1: Si intentan entrar a /create-league sin sesión, los echa al /login
-        if (rutaActual === '/' || rutaActual === '') {
+        if (rutaActual === '/' || rutaActual === '' || rutaActual === '/login') {
             window.history.replaceState({}, '', '/login');
-            btnLogin.classList.add('activo');
-            return renderLogin();
-        }
-
-        if (rutaActual === '/login') {
             btnLogin.classList.add('activo');
             return renderLogin();
         }
@@ -59,7 +51,7 @@ async function evaluarRuta() {
             btnRegister.classList.add('activo');
             return renderRegister();
         }
-        else{
+        else {
             window.history.replaceState({}, '', '/login');
             btnLogin.classList.add('activo');
             return renderLogin();
@@ -68,7 +60,6 @@ async function evaluarRuta() {
     
     // --- ENTORNO LOGUEADO ---
     else {
-        // Ocultamos los botones de login y registro porque ya tiene sesión iniciada
         btnLogin.style.display = 'none';
         btnRegister.style.display = 'none';
         btnLogout.style.display = 'block';
@@ -77,13 +68,9 @@ async function evaluarRuta() {
             btnEditProfile.textContent = auth.username;
             btnEditProfile.classList.remove('oculto');
         }
-        // Si está logueado y va a la raíz, al login o al registro, lo mandamos a /hola
-        if (rutaActual === '/' || rutaActual === '') {
-            window.history.replaceState({}, '', '/hola');
-            return renderHola();
-        }
 
-        if (rutaActual === '/hola') {
+        if (rutaActual === '/' || rutaActual === '' || rutaActual === '/hola') {
+            window.history.replaceState({}, '', '/hola');
             return renderHola();
         }
         else if (rutaActual === '/create-league'){
@@ -99,25 +86,19 @@ async function evaluarRuta() {
         else if (rutaActual.startsWith('/league/')) {
             const leagueId = rutaActual.split('/league/')[1];
             
-            // Si no hay ID o no es un número válido, lo mandamos a /hola
             if (!leagueId || isNaN(leagueId)) {
                 window.history.replaceState({}, '', '/hola');
                 return renderHola();
             }
             
-            // Carga los detalles de la liga pasándole su ID
             return renderLeagueDetails(leagueId);
         }
-        else{
+        else {
             window.history.replaceState({}, '', '/hola');
-            btnLogin.classList.add('activo');
+            // Corregido: Ya no añadimos la clase activa a Login cuando estamos logueados y en una ruta desconocida
             return renderHola();
         }
     }
-
-    // --- RUTA NO ENCONTRADA (404) ---
-    console.log("Ruta no encontrada: " + rutaActual);
-    document.getElementById('vista-principal').innerHTML = `<h2>Page not found 😢</h2>`;
 }
 
 // --- ESCUCHAS DE EVENTOS ---
@@ -149,11 +130,9 @@ if (btnEditProfile) {
 document.getElementById('btn-logout').addEventListener('click', async () => {
     try {
         const respuesta = await fetch('/api/auth/logout', { method: 'POST' });
-        
         if (respuesta.ok) {
-            // Si el servidor borra la cookie con éxito, mandamos al usuario a la raíz
             window.history.pushState({}, '', '/');
-            evaluarRuta(); // Al evaluar la ruta sin cookie, el entorno lo mandará automáticamente a /login
+            evaluarRuta(); 
         }
     } catch (error) {
         console.error('Error al cerrar sesión:', error);
