@@ -30,7 +30,7 @@ CREATE TABLE Rounds (
 );
 
 CREATE TABLE CharactersS (
-    character_id SERIAL PRIMARY KEY,
+    character_id INT PRIMARY KEY,
     character_name VARCHAR(50),
     photo VARCHAR(255)
 );
@@ -46,3 +46,81 @@ CREATE TABLE Matches (
     lives_player1 INTEGER DEFAULT NULL,
     lives_player2 INTEGER DEFAULT NULL
 );
+
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (1, 'Mario', '01_Mario.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (2, 'Donkey Kong', '02_Donkey_Kong.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (3, 'Link', '03_Link.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (4, 'Samus/Dark Samus', '04_Samus_Dark_Samus.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (5, 'Yoshi', '05_Yoshi.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (6, 'Kirby', '06_Kirby.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (7, 'Fox', '07_Fox.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (8, 'Pikachu', '08_Pikachu.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (9, 'Luigi', '09_Luigi.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (10, 'Ness', '10_Ness.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (11, 'Captain Falcon', '11_Captain_Falcon.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (12, 'Jigglypuff', '12_Jigglypuff.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (13, 'Peach/Daisy', '13_Peach_Daisy.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (14, 'Bowser', '14_Bowser.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (15, 'Ice Climbers', '15_Ice_Climbers.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (16, 'Sheik', '16_Sheik.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (17, 'Zelda', '17_Zelda.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (18, 'Dr Mario', '18_Dr_Mario.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (19, 'Pichu', '19_Pichu.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (20, 'Falco', '20_Falco.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (21, 'Marth/Lucina', '21_Marth_Lucina.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (22, 'Young Link', '22_Young_Link.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (23, 'Ganondorf', '23_Ganondorf.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (24, 'Mewtwo', '24_Mewtwo.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (25, 'Roy', '25_Roy.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (26, 'Mr Game And Watch', '26_Mr_Game_And_Watch.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (27, 'Meta Knight', '27_Meta_Knight.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (28, 'Pit/Dark Pit', '28_Pit_Dark_Pit.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (29, 'Samus Zero', '29_Samus_Zero.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (30, 'Wario', '30_Wario.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (31, 'Snake', '31_Snake.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (32, 'Ike', '32_Ike.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (33, 'Pokemon Trainer', '33_Pokemon_Trainer.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (34, 'Diddy Kong', '34_Diddy_Kong.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (35, 'Lucas', '35_Lucas.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (36, 'Sonic', '36_Sonic.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (37, 'King Dedede', '37_King_Dedede.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (38, 'Olimar', '38_Olimar.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (39, 'Lucario', '39_Lucario.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (40, 'Rob', '40_Rob.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (41, 'Toon Link', '41_Toon_Link.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (42, 'Wolf', '42_Wolf.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (43, 'Villager', '43_Villager.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (44, 'Mega Man', '44_Mega_Man.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (45, 'Wii Fit Trainer', '45_Wii_Fit_Trainer.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (46, 'Rosalina And Luma', '46_Rosalina_And_Luma.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (47, 'Little Mac', '47_Little_Mac.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (48, 'Greninja', '48_Greninja.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (49, 'Palutena', '49_Palutena.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (50, 'Pac-Man', '50_Pac-Man.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (51, 'Robin', '51_Robin.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (52, 'Shulk', '52_Shulk.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (53, 'Bowsy', '53_Bowsy.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (54, 'Duck Hunt', '54_Duck_Hunt.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (55, 'Ryu/Ken', '55_Ryu_Ken.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (56, 'Cloud', '56_Cloud.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (57, 'Corrin', '57_Corrin.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (58, 'Bayonetta', '58_Bayonetta.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (59, 'Inkling', '59_Inkling.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (60, 'Ridley', '60_Ridley.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (61, 'Simon/Richter', '61_Simon_Richter.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (62, 'King K Rool', '62_King_K_Rool.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (63, 'Isabelle', '63_Isabelle.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (64, 'Incineroar', '64_Incineroar.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (65, 'Piranha Plant', '65_Piranha_Plant.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (66, 'Joker', '66_Joker.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (67, 'Hero', '67_Hero.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (68, 'Banjo Kazooie', '68_Banjo_Kazooie.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (69, 'Terry', '69_Terry.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (70, 'Byleth', '70_Byleth.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (71, 'Min Min', '71_Min_Min.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (72, 'Steve', '72_Steve.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (73, 'Sephirot', '73_Sephirot.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (74, 'Pyra Mithra', '74_Pyra_Mithra.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (75, 'Kazuya', '75_Kazuya.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (76, 'Sora', '76_Sora.png');
+INSERT INTO CharactersS (character_id, character_name, photo) VALUES (77, 'Random', 'Random.png');

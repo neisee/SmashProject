@@ -1,4 +1,6 @@
 const LeagueModel = require('../models/leagueModel');
+const UserModel = require('../models/userModel');
+const bcrypt = require('bcrypt');
 
 const leagueController = {
     getLeagues: async (req, res) => {
@@ -408,16 +410,27 @@ const leagueController = {
         const { leagueId } = req.params;
         const { player1Id, player2Id, livesPlayer1, livesPlayer2 } = req.body;
 
+        const cookieValue = req.cookies.auth_session;
+        const currentUserId = parseInt(cookieValue.split('logged_in_user_')[1], 10);
+
+        // Normalizar player ids a enteros o null para comparaciones seguras
+        const p1 = (player1Id === null || player1Id === undefined || player1Id === '') ? null : parseInt(player1Id, 10);
+        const p2 = (player2Id === null || player2Id === undefined || player2Id === '') ? null : parseInt(player2Id, 10);
+
+        if (p1 !== currentUserId && p2 !== currentUserId) {
+            return res.status(401).json({ error: 'Unauthorized action' });
+        }
+
         try {
             if (livesPlayer1 === undefined || livesPlayer2 === undefined) {
                 return res.status(400).json({ error: 'Missing scores for players.' });
             }
 
             const actualizado = await LeagueModel.updateMatchScore(
-                leagueId, 
-                player1Id, 
-                player2Id, 
-                livesPlayer1, 
+                leagueId,
+                p1,
+                p2,
+                livesPlayer1,
                 livesPlayer2
             );
 
@@ -440,6 +453,62 @@ const leagueController = {
         } catch (error) {
             console.error('Error in updateMatchResult:', error);
             return res.status(500).json({ error: 'Internal server error saving the score.' });
+        }
+    },
+
+    deleteLeague: async (req, res) => {
+        if (!req.cookies || !req.cookies.auth_session) {
+            return res.status(401).json({ error: 'Unauthorized: No session cookie found.' });
+        }
+
+        const { leagueId } = req.params;
+        const { password } = req.body; // 🆕 Extraemos la contraseña enviada desde el frontend
+        const cookieValue = req.cookies.auth_session;
+        const currentUserId = parseInt(cookieValue.split('logged_in_user_')[1], 10);
+
+        if (!password) {
+            return res.status(400).json({ error: 'Password is required to delete the league.' });
+        }
+
+        try {
+            // 1. Validar que la liga exista
+            const league = await LeagueModel.findById(leagueId);
+            if (!league) {
+                return res.status(404).json({ error: 'League not found.' });
+            }
+
+            // 2. Validar que sea el creador
+            if (currentUserId !== league.creator_id) {
+                return res.status(401).json({ error: 'You cannot delete a league if you are not its creator.' });
+            }
+
+            // 3. 🆕 VALIDAR CONTRASEÑA: Busca al usuario en tu DB (Usa tu propio UserModel)
+            const user = await UserModel.findById(currentUserId);
+            if (!user) {
+                return res.status(401).json({ error: 'User not found.' });
+            }
+
+            // Compara las contraseñas usando bcrypt con el campo `hashed_password`
+            const isValidPassword = await bcrypt.compare(password, user.hashed_password);
+            
+            if (!isValidPassword) {
+                return res.status(401).json({ error: 'Incorrect account password.' });
+            }
+
+            // 4. Si todo es correcto, borramos
+            const deleted = await LeagueModel.deleteLeague(leagueId);
+            if (!deleted) {
+                return res.status(400).json({ error: 'League could not be deleted.' });
+            }
+
+            return res.status(200).json({
+                message: `Deleted the league: ${league.name}!`,
+                leagueId: league.league_id
+            });
+            
+        } catch (error) {
+            console.error('Error in deleteLeague:', error);
+            return res.status(500).json({ error: 'Internal server error.' });
         }
     }
 };

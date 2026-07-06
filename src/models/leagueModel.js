@@ -262,6 +262,13 @@ const LeagueModel = {
         // Aquí sí está definido pool
         const { rowCount } = await pool.query(query, params);
         return rowCount > 0;
+    },
+
+    deleteLeague: async (leagueId) => {
+        const query = 'DELETE FROM Leagues WHERE league_id = $1';
+        const result = await pool.query(query, [leagueId]);
+        // 🆕 Retorna true si eliminó la fila, false si no encontró ninguna que coincida
+        return result.rowCount > 0; 
     }
 };
 
