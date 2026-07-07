@@ -462,7 +462,7 @@ const leagueController = {
         }
 
         const { leagueId } = req.params;
-        const { password } = req.body; // 🆕 Extraemos la contraseña enviada desde el frontend
+        const { password } = req.body;
         const cookieValue = req.cookies.auth_session;
         const currentUserId = parseInt(cookieValue.split('logged_in_user_')[1], 10);
 
@@ -508,6 +508,33 @@ const leagueController = {
             
         } catch (error) {
             console.error('Error in deleteLeague:', error);
+            return res.status(500).json({ error: 'Internal server error.' });
+        }
+    },
+
+    getUnableCharacters: async (req, res) => {
+        if (!req.cookies || !req.cookies.auth_session) {
+            return res.status(401).json({ error: 'Unauthorized: No session cookie found.' });
+        }
+        const cookieValue = req.cookies.auth_session;
+        const currentUserId = parseInt(cookieValue.split('logged_in_user_')[1], 10);
+        const { leagueId } = req.params;
+        const { userId } = req.body;
+        try{
+            const isParticipantC = await LeagueModel.isParticipant(currentUserId, leagueId);
+            if (!isParticipantC){
+                return res.status(401).json({ error: 'You cannot get information while not being part of the league' });
+            }
+            const isParticipantU = await LeagueModel.isParticipant(userId, leagueId);
+            if (!isParticipantU){
+                return res.status(401).json({ error: 'This user is not part of the league' });
+            }
+            const blockedCharacters = await LeagueModel.getBlockedCharacters(leagueId, userId);
+            return res.status(200).json({
+                blockedCharacters: blockedCharacters
+            })
+        } catch (error){
+            console.error('Error in getUnableCharacters:', error);
             return res.status(500).json({ error: 'Internal server error.' });
         }
     }

@@ -269,6 +269,20 @@ const LeagueModel = {
         const result = await pool.query(query, [leagueId]);
         // 🆕 Retorna true si eliminó la fila, false si no encontró ninguna que coincida
         return result.rowCount > 0; 
+    },
+
+    getBlockedCharacters: async (leagueId, playerId) => {
+        const query = `
+            SELECT DISTINCT c.* FROM CharactersS c
+            JOIN Matches m ON (c.character_id = m.character1 OR c.character_id = m.character2)
+            WHERE m.league_id = $2
+            AND (
+                (m.player1 = $1 AND m.character1 = c.character_id AND m.lives_player1 > m.lives_player2)
+                OR 
+                (m.player2 = $1 AND m.character2 = c.character_id AND m.lives_player2 > m.lives_player1)
+            )`
+        const { rows } = await pool.query(query, [playerId, leagueId]);
+        return rows;
     }
 };
 
