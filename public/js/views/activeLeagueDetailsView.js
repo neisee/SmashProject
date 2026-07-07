@@ -128,9 +128,9 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
                         
                         const esVerdeTop = (index === 0 || index === 1);  
                         const esAmarilloTop = (index >= 2 && index <= 4); 
-                        const esCuatroUltimos = (index >= participants.length - 4); 
+                        const esTresUltimos = (index >= participants.length - 3); 
                         
-                        const esRojoFinal = esCuatroUltimos && !esVerdeTop && !esAmarilloTop;
+                        const esRojoFinal = esTresUltimos && !esVerdeTop && !esAmarilloTop;
 
                         const colorRankingText = esVerdeTop ? '#00e676' : (esAmarilloTop ? '#ffd700' : (esRojoFinal ? '#ff3333' : '#ff6b6b'));
                         const colorNombre = esVerdeTop ? '#00e676' : (esAmarilloTop ? '#ffd700' : (esRojoFinal ? '#ff3333' : (esUsuarioActual ? '#4caf50' : '#e0e0e0')));
