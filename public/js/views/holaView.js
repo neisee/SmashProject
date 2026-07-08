@@ -21,7 +21,7 @@ export async function renderHola() {
                 <button id="btn-join-league" class="btn-nav btn-fire-join">Join League</button>
             </div>
 
-            <h2>🏆 My Leagues</h2>
+            <h2>My Leagues</h2>
             <div id="leagues-list"></div>
             
             <div id="load-more-container" style="text-align: center; margin-top: 20px;">
@@ -112,10 +112,10 @@ async function fetchLeagues() {
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
                         <div>
                             <h3 style="margin-top: 0; color: white; margin-bottom: 8px;">${league.name}</h3>
-                            <p style="margin: 5px 0; color: #ccc;">👤 Creator: <strong>${league.creador}</strong></p>
-                            <p style="margin: 5px 0; color: #ccc;">🔑 Code: <code>${league.invitation_code}</code></p>
+                            <p style="margin: 5px 0; color: #ccc;">Creator: <strong>${league.creador}</strong></p>
+                            <p style="margin: 5px 0; color: #ccc;">Code: <code>${league.invitation_code}</code></p>
                             <span style="font-size: 14px; color: ${league.in_progress ? '#ff9800' : '#4caf50'}">
-                                ${league.in_progress ? '⏳ In progress' : '🟢 Open registrations'}
+                                ${league.in_progress ? '⏳ In progress' : 'Open registrations'}
                             </span>
                         </div>
                         ${botonAccion}
@@ -142,9 +142,9 @@ async function fetchLeagues() {
     } catch (error) {
         console.error("Error fetching leagues from server:", error);
         if (currentOffset === 0) {
-            leaguesListContainer.innerHTML = "❌ Error loading leagues.";
+            leaguesListContainer.innerHTML = "Error loading leagues.";
         } else {
-            alert("❌ Something went wrong while loading more leagues.");
+            alert("Something went wrong while loading more leagues.");
             btnLoadMore.disabled = false;
             btnLoadMore.innerText = "Load more leagues";
         }
@@ -160,7 +160,7 @@ function mostrarModalConfirmacion(titulo, nombreLigaOriginal, accionConfirmar) {
         <div class="modal-content auth-container" style="animation: modalFadeIn 0.2s ease; text-align: left; max-width: 420px;">
             <h3 style="margin-top: 0; color: white; font-size: 20px; text-align: center;">${titulo}</h3>
             <p style="color: #ff6b6b; margin-bottom: 20px; font-size: 14px; text-align: center;">
-                ⚠️ This action is permanent. Please fill in the fields to confirm.
+                This action is permanent. Please fill in the fields to confirm.
             </p>
             
             <div class="auth-form">
@@ -195,13 +195,13 @@ function mostrarModalConfirmacion(titulo, nombreLigaOriginal, accionConfirmar) {
     overlay.querySelector('#btn-modal-confirm').addEventListener('click', async () => {
         // 1. Validar que el nombre de la liga coincida en el frontend antes de gastar recursos de red
         if (inputName.value.trim() !== nombreLigaOriginal) {
-            errorBox.textContent = "❌ The league name does not match.";
+            errorBox.textContent = "The league name does not match.";
             errorBox.classList.remove('oculto');
             return;
         }
 
         if (!inputPassword.value) {
-            errorBox.textContent = "❌ Password is required.";
+            errorBox.textContent = "Password is required.";
             errorBox.classList.remove('oculto');
             return;
         }
@@ -221,7 +221,7 @@ function eliminarLiga(id) {
     const nombreLiga = tarjeta ? tarjeta.querySelector('h3').textContent.trim() : "";
 
     mostrarModalConfirmacion(
-        "🗑️ Delete League", 
+        "Delete League", 
         nombreLiga, 
         async (passwordIntroducida) => { // Recibe la contraseña desde la modal
             try {
@@ -237,7 +237,7 @@ function eliminarLiga(id) {
                 const data = await response.json();
 
                 if (response.ok) {
-                    mostrarAlertaPersonalizada("🏆 Success", data.message || "League deleted successfully!", true);
+                    mostrarAlertaPersonalizada("Success", data.message || "League deleted successfully!", true);
                     currentOffset = 0;
                     await fetchLeagues(); 
                     return true; // Para cerrar la modal de confirmación
@@ -252,7 +252,7 @@ function eliminarLiga(id) {
                 }
             } catch (error) {
                 console.error("Error deleting league:", error);
-                mostrarAlertaPersonalizada("❌ Connection Error", "Could not connect to the server.", false);
+                mostrarAlertaPersonalizada("Connection Error", "Could not connect to the server.", false);
                 return false;
             }
         }

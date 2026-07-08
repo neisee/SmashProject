@@ -23,7 +23,7 @@ export async function renderEditPlayedMatches(leagueId) {
             `;
         } catch (err) {
             console.error('Error fetching selected character image:', err);
-            buttonElement.textContent = '👤 Select Character';
+            buttonElement.textContent = 'Select Character';
         }
     };
 
@@ -65,7 +65,7 @@ export async function renderEditPlayedMatches(leagueId) {
                         return `
                             <div class="match-edit-card" style="background-color: #242424; border: 1px solid ${esBye ? '#333' : '#444'}; padding: 15px; border-radius: 8px; opacity: ${esBye ? '0.6' : '1'};">
                                 <div style="text-align: center; color: #ff6b6b; font-size: 12px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">
-                                    Round ${m.round_number} ${esBye ? '• Bye Round 🏠' : ''}
+                                    Round ${m.round_number} ${esBye ? 'Bye Round' : ''}
                                 </div>
                                 <div style="display: flex; justify-content: center; align-items: center; gap: 15px;">
                                     

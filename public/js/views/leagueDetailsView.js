@@ -37,7 +37,7 @@ export async function renderLeagueDetails(leagueId) {
             <div class="auth-container" style="max-width: 500px;">
                 <h2 style="margin-bottom: 5px;">${escapeHTML(league.name)}</h2>
                 <p style="text-align: center; color: #4caf50; font-size: 14px; margin-top: 0; margin-bottom: 20px;">
-                    📌 Waiting for tournament to start
+                    Waiting for tournament to start
                 </p>
 
                 <div class="form-group">

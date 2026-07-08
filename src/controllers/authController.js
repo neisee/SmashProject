@@ -101,7 +101,7 @@ const authController = {
             secure: false,
             sameSite: 'lax'
         });
-        console.log('📌 User logged out successfully');
+        console.log('User logged out successfully');
         return res.status(200).json({ message: 'Logout successful' });
     },
 

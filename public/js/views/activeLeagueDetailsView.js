@@ -15,7 +15,7 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
 
     const getSelectCharacterButtonContent = () => {
         if (!selectedCharacterId) {
-            return '👤 Select Character';
+            return 'Select Character';
         }
         return 'Loading selected character...';
     };
@@ -28,7 +28,7 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
             const data = await resp.json();
             if (!resp.ok || !data.imageUrl) {
                 console.warn('No se pudo cargar la imagen del personaje:', data);
-                buttonElement.textContent = '👤 Select Character';
+                buttonElement.textContent = 'Select Character';
                 return;
             }
 
@@ -40,14 +40,14 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
             `;
         } catch (err) {
             console.error('Error fetching selected character image:', err);
-            buttonElement.textContent = '👤 Select Character';
+            buttonElement.textContent = 'Select Character';
         }
     };
 
     let tarjetaPartidoHTML = `
         <div style="background-color: #1f1f1f; border: 1px dashed #444; border-radius: 8px; padding: 15px; text-align: center;">
             <p style="color: #aaa; font-style: italic; font-size: 14px; margin: 0;">
-                🕒 No upcoming matches found
+                No upcoming matches found
             </p>
         </div>
     `;
@@ -64,7 +64,7 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
                     </span>
                     
                     <div style="margin-top: 20px; margin-bottom: 20px;">
-                        <h3 style="color: #4caf50; margin: 0 0 5px 0; font-size: 18px;">🏠 It's your Rest Round!</h3>
+                        <h3 style="color: #4caf50; margin: 0 0 5px 0; font-size: 18px;">It's your Rest Round!</h3>
                         <p style="color: #aaa; font-size: 13px; margin: 0; line-height: 1.4;">
                             You don't have an opponent assigned for this round.<br>
                             You can advance directly to the next round.
@@ -147,7 +147,7 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
                             data-p2-id="${nextMatch.player2}"
                             ${canPostResult ? '' : 'disabled'}
                             style="margin-top: 10px; width: 100%; background-color: ${canPostResult ? '#ff6b6b' : '#666'}; color: ${canPostResult ? '#121212' : '#ccc'}; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: ${canPostResult ? 'pointer' : 'not-allowed'}; transition: background 0.2s; opacity: ${canPostResult ? '1' : '0.75'};">
-                        ${canPostResult ? '🚀 Post Result' : '⏳ Waiting for opponent'}
+                        ${canPostResult ? 'Post Result' : 'Waiting for opponent'}
                     </button>
                 </div>
             `;
@@ -227,7 +227,7 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
                     Back to Dashboard
                 </button>
                 <button id="btn-edit-matches" class="btn-auth" style="background-color: #ff6b6b; color: #121212; border: none; font-weight: bold; margin: 0; flex: 1;">
-                    ⚙️ Edit Played Matches
+                    Edit Played Matches
                 </button>
             </div>
         </div>
@@ -254,7 +254,7 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
         try {
             const data = JSON.parse(event.data);
             if (data.event === 'match-updated' && String(data.leagueId) === String(leagueId)) {
-                console.log('⚡ Actualización detectada. Refrescando datos...');
+                console.log('Actualización detectada. Refrescando datos...');
                 if (typeof onRefresh === 'function') {
                     onRefresh();
                 } else {

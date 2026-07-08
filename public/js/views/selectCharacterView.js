@@ -80,7 +80,7 @@ export async function renderSelectCharacter(leagueId, matchId) {
                              display: flex;
                              align-items: center;
                              justify-content: center;
-                             ${isBlocked ? 'pointer-events: none;' : ''} /* 🚫 Evita clicks por completo */
+                             ${isBlocked ? 'pointer-events: none;' : ''} /* Evita clicks por completo */
                          "
                          ${!isBlocked ? `
                          onmouseover="if(this.style.borderColor !== 'rgb(255, 139, 15)') { this.style.borderColor='#ff6b6b'; this.style.transform='scale(1.06)'; this.style.zIndex='10'; }"
@@ -94,7 +94,7 @@ export async function renderSelectCharacter(leagueId, matchId) {
                                 height: 100%; 
                                 object-fit: cover; 
                                 pointer-events: none;
-                                ${isBlocked ? 'filter: grayscale(100%) brightness(30%);' : ''} /* 🕶️ Foto apagada/oscura */
+                                ${isBlocked ? 'filter: grayscale(100%) brightness(30%);' : ''} /* Foto apagada/oscura */
                              "
                         />
                     </div>
@@ -104,10 +104,10 @@ export async function renderSelectCharacter(leagueId, matchId) {
 
             <div style="display: flex; gap: 16px; max-width: 500px; margin: 0 auto;">
                 <button id="btn-back-to-league" class="btn-auth" style="background-color: #2a2a2a; color: white; border: 1px solid #444; margin: 0; flex: 1; padding: 12px; font-weight: bold; border-radius: 6px; cursor: pointer;">
-                    ⬅️ Back to League
+                    Back to League
                 </button>
                 <button id="btn-lock-character" class="btn-auth" style="background-color: #ff8b0f; color: #121212; border: none; font-weight: bold; margin: 0; flex: 1; padding: 12px; border-radius: 6px; opacity: 0.6; cursor: not-allowed;" disabled>
-                    🔒 Lock Character
+                    Lock Character
                 </button>
             </div>
         </div>
