@@ -6,6 +6,7 @@ import { renderJoinLeague } from './views/joinLeagueView.js';
 import { renderEditAccount } from './views/editAccountView.js';
 import { renderLeagueDetails } from './views/leagueDetailsView.js';
 import { renderEditPlayedMatches } from './views/editPlayedMatchesView.js';
+import { renderSelectCharacter } from './views/selectCharacterView.js';
 
 // Auxiliar para consultar la cookie al servidor
 async function checkAuthStatus() {
@@ -100,6 +101,22 @@ async function evaluarRuta() {
                 return renderHola();
             }
             return renderEditPlayedMatches(leagueId);
+        }
+        else if (rutaActual.startsWith('/league/') && rutaActual.includes('/select-character/')) {
+            // Extraemos los IDs de la ruta /league/12/select-character/45
+            
+            const partes = rutaActual.split('/league/')[1].split('/select-character/');
+            const leagueId = partes[0];
+            const matchId = partes[1];
+            
+            if (!leagueId || isNaN(leagueId) || !matchId || isNaN(matchId)) {
+                window.history.replaceState({}, '', '/hola');
+                return renderHola();
+            }
+            
+            // Aquí llamas a tu vista (recuerda importarla arriba en el router)
+            
+            return renderSelectCharacter(leagueId, matchId);
         }
         else if (rutaActual.startsWith('/league/')) {
             const leagueId = rutaActual.split('/league/')[1];

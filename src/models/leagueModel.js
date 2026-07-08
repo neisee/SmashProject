@@ -218,10 +218,7 @@ const LeagueModel = {
     getNextMatchForUser: async (leagueId, userId) => {
         const query = `
             SELECT 
-                m.player1, 
-                m.player2, 
-                m.lives_player1, 
-                m.lives_player2, 
+                m.*, 
                 r.round_number
             FROM Matches m
             JOIN Rounds r ON m.round_id = r.round_id

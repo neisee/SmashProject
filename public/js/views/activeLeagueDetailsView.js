@@ -76,10 +76,18 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
                         </div>
                     </div>
                     
+                    <button id="btn-select-character" 
+                            data-match-id="${nextMatch.id}"
+                            style="margin-top: 18px; width: 100%; background-color: #242424; color: #ff8b0f; border: 1px solid #ff8b0f; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: all 0.2s ease;"
+                            onmouseover="this.style.backgroundColor='rgba(255,139,15,0.1)'; this.style.color='white';" 
+                            onmouseout="this.style.backgroundColor='#242424'; this.style.color='#ff8b0f';">
+                        👤 Select Character
+                    </button>
+                    
                     <button id="btn-post-result" 
                             data-p1-id="${nextMatch.player1}" 
                             data-p2-id="${nextMatch.player2}"
-                            style="margin-top: 18px; width: 100%; background-color: #ff6b6b; color: #121212; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
+                            style="margin-top: 10px; width: 100%; background-color: #ff6b6b; color: #121212; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
                         🚀 Post Result
                     </button>
                 </div>
@@ -205,20 +213,29 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
             window.activeLeagueSocket = null;
         }
     };
+
     // --- MANEJO DE EVENTOS DE BOTONES ---
+    
+    // 🎮 EVENTO CLICK DEL BOTÓN "SELECT CHARACTER" AÑADIDO
+    const btnSelectCharacter = document.getElementById('btn-select-character');
+    if (btnSelectCharacter) {
+        btnSelectCharacter.addEventListener('click', () => {
+            const matchId = btnSelectCharacter.getAttribute('data-match-id');
+            limpiarSocket();
+            // Redirección SPA hacia la vista de selección de personaje
+            window.history.pushState({}, '', `/league/${leagueId}/select-character/${matchId}`);
+            window.dispatchEvent(new Event('popstate'));
+        });
+    }
+
     document.getElementById('btn-back-active').addEventListener('click', () => {
-        // 🔥 Limpieza del socket antes de cambiar de vista
-        if (window.activeLeagueSocket) {
-            window.activeLeagueSocket.close();
-            window.activeLeagueSocket = null;
-        }
+        limpiarSocket();
         window.history.pushState({}, '', '/hola');
         window.dispatchEvent(new Event('popstate'));
     });
 
     document.getElementById('btn-edit-matches').addEventListener('click', () => {
         limpiarSocket();
-        // Cambiamos la URL de forma SPA hacia la nueva vista de edición
         window.history.pushState({}, '', `/league/${leagueId}/edit-matches`);
         window.dispatchEvent(new Event('popstate'));
     });

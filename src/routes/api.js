@@ -5,6 +5,8 @@ const router = express.Router();
 // Importamos los controladores correspondientes
 const authController = require('../controllers/authController');
 const leagueController = require('../controllers/leagueController');
+const path = require('path');
+const fs = require('fs');
 
 // Rutas de Autenticación
 router.post('/auth/register', authController.register);
@@ -23,5 +25,19 @@ router.put('/leagues/:id/start', leagueController.startLeague);
 router.delete('/leagues/:leagueId', leagueController.deleteLeague);
 router.get('/leagues/:leagueId/matches', leagueController.getLeagueMatches);
 router.put('/leagues/:leagueId/matches/result', leagueController.updateMatchResult);
+
+// Lista de imágenes de personajes disponibles
+router.get('/characters', (req, res) => {
+	const dir = path.join(__dirname, '..', '..', 'public', 'images', 'Characters');
+	fs.readdir(dir, (err, files) => {
+		if (err) {
+			console.error('Error leyendo carpeta de personajes:', err);
+			return res.status(500).json({ error: 'No se pudo leer la carpeta de personajes' });
+		}
+		// Filtrar solo imágenes (png,jpg,jpeg,gif) y ordenar por nombre
+		const images = files.filter(f => /\.(png|jpe?g|gif)$/i.test(f)).sort();
+		res.json({ images });
+	});
+});
 
 module.exports = router;
