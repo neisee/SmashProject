@@ -150,7 +150,7 @@ export async function renderSelectCharacter(leagueId, matchId) {
 
         const confirmado = await mostrarConfirmacionModal(
             'Lock Character', 
-            `Are you sure you want to select character #${personajeSeleccionadoId} for this match?`
+            `Are you sure you want to select this character for this match?`
         );
         if (!confirmado) return;
 

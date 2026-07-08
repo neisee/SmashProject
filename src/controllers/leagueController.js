@@ -427,7 +427,7 @@ const leagueController = {
                 return res.status(400).json({ error: 'Missing scores for players.' });
             }
             const charactersExist = await LeagueModel.areCharactersSelected(leagueId, player1Id, player2Id);
-            if(!charactersExist){
+            if(!charactersExist && p1 && p2){
                 return res.status(401).json({ error: "The two players MUST select a character"});
             }
             const actualizado = await LeagueModel.updateMatchScore(
