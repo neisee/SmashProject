@@ -58,18 +58,22 @@ export async function renderEditPlayedMatches(leagueId) {
                         const usuarioActualEsP1 = datos.currentUserId === m.player1;
                         const selectedCharacterId = usuarioActualEsP1 ? m.character1 : m.character2;
                         const botonTexto = selectedCharacterId ? 'Loading selected character...' : '👤 Select Character';
+                        
+                        // 🛑 DETECTAR SI ES BYE ROUND (Si alguno de los dos IDs es nulo o el string 'null')
+                        const esBye = (!m.player1 || m.player1 === 'null' || !m.player2 || m.player2 === 'null');
 
                         return `
-                            <div class="match-edit-card" style="background-color: #242424; border: 1px solid #444; padding: 15px; border-radius: 8px;">
-                                <div style="text-align: center; color: #ff6b6b; font-size: 12px; font-weight: bold; margin-bottom: 10px; uppercase">
-                                    Round ${m.round_number}
+                            <div class="match-edit-card" style="background-color: #242424; border: 1px solid ${esBye ? '#333' : '#444'}; padding: 15px; border-radius: 8px; opacity: ${esBye ? '0.6' : '1'};">
+                                <div style="text-align: center; color: #ff6b6b; font-size: 12px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">
+                                    Round ${m.round_number} ${esBye ? '• Bye Round 🏠' : ''}
                                 </div>
                                 <div style="display: flex; justify-content: center; align-items: center; gap: 15px;">
                                     
                                     <div style="flex: 1; text-align: right;">
                                         <span style="color: white; font-weight: bold; display: block; margin-bottom: 4px;">${escapeHTML(m.player1_name || 'Bye')}</span>
                                         <input type="number" id="edit-p1-${index}" value="${m.lives_player1}" min="0" max="99" 
-                                               style="width: 55px; background: #121212; border: 1px solid #555; color: white; text-align: center; padding: 4px; border-radius: 4px; font-weight: bold;">
+                                               ${esBye ? 'disabled' : ''} 
+                                               style="width: 55px; background: #121212; border: 1px solid #555; color: ${esBye ? '#666' : 'white'}; text-align: center; padding: 4px; border-radius: 4px; font-weight: bold;">
                                     </div>
 
                                     <div style="color: #ff6b6b; font-weight: bold; font-style: italic;">VS</div>
@@ -77,18 +81,26 @@ export async function renderEditPlayedMatches(leagueId) {
                                     <div style="flex: 1; text-align: left;">
                                         <span style="color: white; font-weight: bold; display: block; margin-bottom: 4px;">${escapeHTML(m.player2_name || 'Bye')}</span>
                                         <input type="number" id="edit-p2-${index}" value="${m.lives_player2}" min="0" max="99" 
-                                               style="width: 55px; background: #121212; border: 1px solid #555; color: white; text-align: center; padding: 4px; border-radius: 4px; font-weight: bold;">
+                                               ${esBye ? 'disabled' : ''} 
+                                               style="width: 55px; background: #121212; border: 1px solid #555; color: ${esBye ? '#666' : 'white'}; text-align: center; padding: 4px; border-radius: 4px; font-weight: bold;">
                                     </div>
 
                                 </div>
-                                <button class="btn-select-character" data-index="${index}" data-match-id="${m.id}" data-character-id="${selectedCharacterId || ''}"
-                                        style="margin-top: 12px; width: 100%; background: #242424; color: #ff8b0f; border: 1px solid #ff8b0f; padding: 8px; font-weight: bold; border-radius: 4px; cursor: pointer;">
-                                    ${botonTexto}
-                                </button>
-                                <button class="btn-save-match" data-index="${index}" data-p1="${m.player1}" data-p2="${m.player2}"
-                                        style="margin-top: 10px; width: 100%; background: #4caf50; color: #121212; border: none; padding: 6px; font-weight: bold; border-radius: 4px; cursor: pointer;">
-                                    Save Match Result
-                                </button>
+                                
+                                ${!esBye ? `
+                                    <button class="btn-select-character" data-index="${index}" data-match-id="${m.id}" data-character-id="${selectedCharacterId || ''}"
+                                            style="margin-top: 12px; width: 100%; background: #242424; color: #ff8b0f; border: 1px solid #ff8b0f; padding: 8px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+                                        ${botonTexto}
+                                    </button>
+                                    <button class="btn-save-match" data-index="${index}" data-p1="${m.player1}" data-p2="${m.player2}"
+                                            style="margin-top: 10px; width: 100%; background: #4caf50; color: #121212; border: none; padding: 6px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+                                        Save Match Result
+                                    </button>
+                                ` : `
+                                    <div style="margin-top: 12px; text-align: center; color: #666; font-size: 12px; font-style: italic;">
+                                        Match locked (Rest Round)
+                                    </div>
+                                `}
                             </div>
                         `;
                     }).join('')}
