@@ -171,7 +171,7 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
         <div class="auth-container" style="max-width: 580px;">
             <h2 style="margin-bottom: 5px;">${escapeHTML(league.name)}</h2>
             <p style="text-align: center; color: #ff6b6b; font-size: 14px; margin-top: 0; margin-bottom: 25px; font-weight: bold;">
-                🔴 League in Progress (Tournament Live)
+                League in Progress (Tournament Live)
             </p>
 
             <div style="margin-bottom: 25px;">
