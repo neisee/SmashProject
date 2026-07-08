@@ -396,7 +396,7 @@ const leagueController = {
 
         try {
             const matches = await LeagueModel.getLeagueMatches(leagueId, currentUserId);
-            return res.status(200).json({ matches });
+            return res.status(200).json({ matches, currentUserId });
         } catch (error) {
             console.error('Error in getLeagueMatches:', error);
             return res.status(500).json({ error: 'Internal server error loading matches.' });
@@ -426,7 +426,10 @@ const leagueController = {
             if (livesPlayer1 === undefined || livesPlayer2 === undefined) {
                 return res.status(400).json({ error: 'Missing scores for players.' });
             }
-
+            const charactersExist = await LeagueModel.areCharactersSelected(leagueId, player1Id, player2Id);
+            if(!charactersExist){
+                return res.status(401).json({ error: "The two players MUST select a character"});
+            }
             const actualizado = await LeagueModel.updateMatchScore(
                 leagueId,
                 p1,

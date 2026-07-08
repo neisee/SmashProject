@@ -198,6 +198,8 @@ const LeagueModel = {
                 m.id,
                 m.player1,
                 m.player2,
+                m.character1,
+                m.character2,
                 m.lives_player1,
                 m.lives_player2,
                 r.round_number,
@@ -315,6 +317,14 @@ const LeagueModel = {
 
         await pool.query(queryUpdate, [characterId, matchId]);
         return { success: true, columnUpdated: columnaAEditar };
+    },
+
+    areCharactersSelected: async (leagueId, player1Id, player2Id) => {
+        const query = `SELECT COUNT(*) FROM Matches
+            WHERE league_id = $1 AND character1 IS NOT NULL AND character2 IS NOT NULL
+            AND ((player1 = $2 AND player2 = $3) OR (player2 = $2 AND player1 = $3))`;
+        const {rows} = await pool.query(query, [leagueId, player1Id, player2Id]);
+        return parseInt(rows[0].count, 10) > 0;
     }
 };
 

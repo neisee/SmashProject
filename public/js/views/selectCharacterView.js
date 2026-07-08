@@ -142,8 +142,7 @@ export async function renderSelectCharacter(leagueId, matchId) {
 
     // --- MANEJO DE EVENTOS DE BOTONES ---
     document.getElementById('btn-back-to-league').addEventListener('click', () => {
-        window.history.pushState({}, '', `/league/${leagueId}`);
-        window.dispatchEvent(new Event('popstate'));
+        window.history.back();
     });
 
     btnLock.addEventListener('click', async () => {
@@ -167,8 +166,7 @@ export async function renderSelectCharacter(leagueId, matchId) {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Error saving character');
 
-            window.history.pushState({}, '', `/league/${leagueId}`);
-            window.dispatchEvent(new Event('popstate'));
+            window.history.back();
 
         } catch (err) {
             await mostrarErrorModal('Selection Error', err.message);

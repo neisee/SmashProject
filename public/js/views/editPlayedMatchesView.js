@@ -3,6 +3,30 @@ import { mostrarConfirmacionModal, mostrarErrorModal, escapeHTML } from './leagu
 export async function renderEditPlayedMatches(leagueId) {
     const contenedor = document.getElementById('vista-principal');
 
+    const fetchCharacterButtonImage = async (buttonElement, characterId) => {
+        if (!buttonElement || !characterId) return;
+
+        try {
+            const resp = await fetch(`/api/characters/${characterId}`);
+            const data = await resp.json();
+            if (!resp.ok || !data.imageUrl) {
+                console.warn('Error al cargar imagen de personaje:', data);
+                buttonElement.textContent = '👤 Select Character';
+                return;
+            }
+
+            buttonElement.innerHTML = `
+                <span style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%;">
+                    <img src="${data.imageUrl}" alt="Character ${characterId}" style="height:24px; width:auto; border-radius:4px; box-shadow: 0 0 8px rgba(0,0,0,0.4);">
+                    <span style="font-size: 14px; font-weight: bold; color: white;">Change</span>
+                </span>
+            `;
+        } catch (err) {
+            console.error('Error fetching selected character image:', err);
+            buttonElement.textContent = '👤 Select Character';
+        }
+    };
+
     try {
         // 1. Petición para pillar los partidos de esta liga
         const res = await fetch(`/api/leagues/${leagueId}/matches`);
@@ -31,6 +55,10 @@ export async function renderEditPlayedMatches(leagueId) {
                 
                 <div style="display: flex; flex-direction: column; gap: 14px;">
                     ${partidosJugados.map((m, index) => {
+                        const usuarioActualEsP1 = datos.currentUserId === m.player1;
+                        const selectedCharacterId = usuarioActualEsP1 ? m.character1 : m.character2;
+                        const botonTexto = selectedCharacterId ? 'Loading selected character...' : '👤 Select Character';
+
                         return `
                             <div class="match-edit-card" style="background-color: #242424; border: 1px solid #444; padding: 15px; border-radius: 8px;">
                                 <div style="text-align: center; color: #ff6b6b; font-size: 12px; font-weight: bold; margin-bottom: 10px; uppercase">
@@ -53,8 +81,12 @@ export async function renderEditPlayedMatches(leagueId) {
                                     </div>
 
                                 </div>
+                                <button class="btn-select-character" data-index="${index}" data-match-id="${m.id}" data-character-id="${selectedCharacterId || ''}"
+                                        style="margin-top: 12px; width: 100%; background: #242424; color: #ff8b0f; border: 1px solid #ff8b0f; padding: 8px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+                                    ${botonTexto}
+                                </button>
                                 <button class="btn-save-match" data-index="${index}" data-p1="${m.player1}" data-p2="${m.player2}"
-                                        style="margin-top: 12px; width: 100%; background: #4caf50; color: #121212; border: none; padding: 6px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+                                        style="margin-top: 10px; width: 100%; background: #4caf50; color: #121212; border: none; padding: 6px; font-weight: bold; border-radius: 4px; cursor: pointer;">
                                     Save Match Result
                                 </button>
                             </div>
@@ -68,7 +100,21 @@ export async function renderEditPlayedMatches(leagueId) {
             </div>
         `;
 
-        // 3. Event Listeners para actualizar cada partido individualmente
+        // 3. Event Listeners para editar el personaje de cada match
+        document.querySelectorAll('.btn-select-character').forEach(boton => {
+            const characterId = boton.getAttribute('data-character-id');
+            if (characterId) {
+                fetchCharacterButtonImage(boton, parseInt(characterId, 10));
+            }
+
+            boton.addEventListener('click', () => {
+                const matchId = boton.getAttribute('data-match-id');
+                window.history.pushState({}, '', `/league/${leagueId}/select-character/${matchId}`);
+                window.dispatchEvent(new Event('popstate'));
+            });
+        });
+
+        // 4. Event Listeners para actualizar cada partido individualmente
         document.querySelectorAll('.btn-save-match').forEach(boton => {
             boton.addEventListener('click', async (e) => {
                 const idx = e.target.getAttribute('data-index');
