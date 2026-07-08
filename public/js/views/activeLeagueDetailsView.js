@@ -3,7 +3,7 @@ import { mostrarConfirmacionModal, mostrarErrorModal, escapeHTML } from './leagu
 // --- VISTA LIVE ORDENADA DIRECTAMENTE POR TU BACKEND RECURSIVO ---
 export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
     const contenedor = document.getElementById('vista-principal');
-    const { league, participants, nextMatch, currentUsername, currentUserId } = datos;
+    const { league, participants, nextMatch, currentUsername, currentUserId, opponentNextMatchInfo } = datos;
 
     const currentUserText = currentUsername || document.getElementById('btn-edit-profile')?.textContent || '';
 
@@ -90,6 +90,13 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
 
             const p1Label = (p1Name === currentUserText) ? ' <span style="color:#4caf50; font-size:11px;">(You)</span>' : '';
             const p2Label = (p2Name === currentUserText) ? ' <span style="color:#4caf50; font-size:11px;">(You)</span>' : '';
+            const isCurrentUserP1 = Number(nextMatch.player1) === Number(currentUserId);
+            const opponentStatusText = opponentNextMatchInfo?.isReadyToPlay
+                ? 'Ready to play'
+                : (opponentNextMatchInfo?.roundNumber !== null ? `Round ${opponentNextMatchInfo?.roundNumber}` : 'Waiting for round');
+            const opponentStatusColor = opponentNextMatchInfo?.isReadyToPlay ? '#4caf50' : '#ffb347';
+            const opponentStatusBg = opponentNextMatchInfo?.isReadyToPlay ? 'rgba(76,175,80,0.15)' : 'rgba(255,179,71,0.15)';
+            const canPostResult = Boolean(nextMatch && nextMatch.player1 !== null && nextMatch.player2 !== null && opponentNextMatchInfo?.isReadyToPlay);
 
             tarjetaPartidoHTML = `
                 <div style="background: linear-gradient(135deg, #2b2b2b 0%, #1f1f1f 100%); border: 2px solid #ff6b6b; border-radius: 8px; padding: 16px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
@@ -99,7 +106,14 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
                     
                     <div style="display: flex; justify-content: center; align-items: flex-start; gap: 20px; margin-top: 15px;">
                         <div style="flex: 1; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-                            <span style="font-size: 16px; font-weight: bold; color: #e0e0e0;">${escapeHTML(p1Name)}${p1Label}</span>
+                            <div style="display: flex; align-items: center; gap: 8px; flex-direction: row-reverse;">
+                                <span style="font-size: 16px; font-weight: bold; color: #e0e0e0;">${escapeHTML(p1Name)}${p1Label}</span>
+                                ${!isCurrentUserP1 ? `
+                                    <span style="font-size: 11px; font-weight: 600; color: ${opponentStatusColor}; background: ${opponentStatusBg}; border: 1px solid ${opponentStatusColor}; border-radius: 999px; padding: 2px 8px; white-space: nowrap;">
+                                        ${escapeHTML(opponentStatusText)}
+                                    </span>
+                                ` : ''}
+                            </div>
                             <input type="number" id="score-player1" min="0" max="99" placeholder="Lives" 
                                    style="width: 60px; background-color: #121212; border: 1px solid #444; color: white; padding: 6px; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; margin-top: 4px; appearance: textfield; -moz-appearance: textfield; -webkit-appearance: none;">
                         </div>
@@ -107,7 +121,14 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
                         <div style="font-size: 18px; font-weight: bold; color: #ff6b6b; font-style: italic; margin-top: 4px;">VS</div>
                         
                         <div style="flex: 1; text-align: left; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;">
-                            <span style="font-size: 16px; font-weight: bold; color: #e0e0e0;">${escapeHTML(p2Name)}${p2Label}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 16px; font-weight: bold; color: #e0e0e0;">${escapeHTML(p2Name)}${p2Label}</span>
+                                ${isCurrentUserP1 ? `
+                                    <span style="font-size: 11px; font-weight: 600; color: ${opponentStatusColor}; background: ${opponentStatusBg}; border: 1px solid ${opponentStatusColor}; border-radius: 999px; padding: 2px 8px; white-space: nowrap;">
+                                        ${escapeHTML(opponentStatusText)}
+                                    </span>
+                                ` : ''}
+                            </div>
                             <input type="number" id="score-player2" min="0" max="99" placeholder="Lives" 
                                    style="width: 60px; background-color: #121212; border: 1px solid #444; color: white; padding: 6px; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; margin-top: 4px; appearance: textfield; -moz-appearance: textfield; -webkit-appearance: none;">
                         </div>
@@ -124,8 +145,9 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
                     <button id="btn-post-result" 
                             data-p1-id="${nextMatch.player1}" 
                             data-p2-id="${nextMatch.player2}"
-                            style="margin-top: 10px; width: 100%; background-color: #ff6b6b; color: #121212; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
-                        🚀 Post Result
+                            ${canPostResult ? '' : 'disabled'}
+                            style="margin-top: 10px; width: 100%; background-color: ${canPostResult ? '#ff6b6b' : '#666'}; color: ${canPostResult ? '#121212' : '#ccc'}; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: ${canPostResult ? 'pointer' : 'not-allowed'}; transition: background 0.2s; opacity: ${canPostResult ? '1' : '0.75'};">
+                        ${canPostResult ? '🚀 Post Result' : '⏳ Waiting for opponent'}
                     </button>
                 </div>
             `;
@@ -292,8 +314,13 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
                 return;
             }
 
-            const confirmado = await mostrarConfirmacionModal('Submit Result', 'Are you sure you want to save this score?');
-            if (!confirmado) return;
+            if (!btnPostResult.disabled) {
+                const confirmado = await mostrarConfirmacionModal('Submit Result', 'Are you sure you want to save this score?');
+                if (!confirmado) return;
+            } else {
+                await mostrarErrorModal('Not ready yet', 'Both players must be ready for this round before posting the result.');
+                return;
+            }
 
             try {
                 const res = await fetch(`/api/leagues/${leagueId}/matches/result`, {

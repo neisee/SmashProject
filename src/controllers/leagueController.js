@@ -118,6 +118,7 @@ const leagueController = {
             const isCreator = (league.creator_id === currentUserId);
 
             let nextMatch = null;
+            let opponentNextMatchInfo = null;
 
             if (league.in_progress) {
                 // 1. Nos traemos TODOS los partidos jugados de la liga una sola vez para no saturar la BD
@@ -274,6 +275,19 @@ const leagueController = {
                 // Lanzamos el procesador recursivo para resolver los empates que hayan quedado de la lista global
                 participants = await procesarGrupos(listaParaOrdenar);
                 nextMatch = await LeagueModel.getNextMatchForUser(id, currentUserId);
+
+                if (nextMatch && nextMatch.player1 !== null && nextMatch.player2 !== null) {
+                    const opponentId = (nextMatch.player1 === currentUserId) ? nextMatch.player2 : nextMatch.player1;
+                    if (opponentId) {
+                        const opponentNextMatch = await LeagueModel.getNextMatchForUser(id, opponentId);
+                        const nextDisplayRound = (opponentNextMatch?.round_number ?? nextMatch.round_number) + 1;
+                        opponentNextMatchInfo = {
+                            opponentUserId: opponentId,
+                            isReadyToPlay: Boolean(opponentNextMatch && opponentNextMatch.id === nextMatch.id),
+                            roundNumber: nextDisplayRound
+                        };
+                    }
+                }
             }
 
             return res.status(200).json({
@@ -281,7 +295,8 @@ const leagueController = {
                 participants,
                 isCreator, // 👈 Enviamos este booleano limpio al frontend
                 currentUserId,
-                nextMatch
+                nextMatch,
+                opponentNextMatchInfo
             });
 
         } catch (error) {
@@ -430,6 +445,26 @@ const leagueController = {
             if(!charactersExist && p1 && p2){
                 return res.status(401).json({ error: "The two players MUST select a character"});
             }
+
+            const opponentId = (p1 === currentUserId) ? p2 : (p2 === currentUserId ? p1 : null);
+            if (opponentId) {
+                const currentUserNextMatch = await LeagueModel.getNextMatchForUser(leagueId, currentUserId);
+                const opponentNextMatch = await LeagueModel.getNextMatchForUser(leagueId, opponentId);
+                const isReadyToPlay = Boolean(
+                    currentUserNextMatch &&
+                    opponentNextMatch &&
+                    currentUserNextMatch.id === opponentNextMatch.id &&
+                    (
+                        (currentUserNextMatch.player1 === p1 && currentUserNextMatch.player2 === p2) ||
+                        (currentUserNextMatch.player1 === p2 && currentUserNextMatch.player2 === p1)
+                    )
+                );
+
+                if (!isReadyToPlay) {
+                    return res.status(409).json({ error: 'Both players must be ready for this round before posting the result.' });
+                }
+            }
+
             const actualizado = await LeagueModel.updateMatchScore(
                 leagueId,
                 p1,
