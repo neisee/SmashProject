@@ -104,7 +104,7 @@ async function fetchLeagues() {
                 // 🆕 Lógica condicional: comparamos con el usuario actual leído del DOM
                 const esCreador = league.creador === getCurrentUser();
             const botonAccion = esCreador 
-                ? `<button class="btn-card-action btn-delete-league" data-id="${league.league_id}">🗑️ Delete League</button>`
+                ? `<button class="btn-card-action btn-delete-league" data-id="${league.league_id}">Delete</button>`
                 : '';
 
             return `

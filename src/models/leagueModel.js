@@ -164,6 +164,8 @@ const LeagueModel = {
             WHERE league_id = $1 
               AND lives_player1 IS NOT NULL 
               AND lives_player2 IS NOT NULL
+              AND player1 IS NOT NULL
+              AND player2 IS NOT NULL
         `;
         try {
             const { rows } = await pool.query(queryMatches, [leagueId]);

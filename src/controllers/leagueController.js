@@ -280,10 +280,17 @@ const leagueController = {
                     const opponentId = (nextMatch.player1 === currentUserId) ? nextMatch.player2 : nextMatch.player1;
                     if (opponentId) {
                         const opponentNextMatch = await LeagueModel.getNextMatchForUser(id, opponentId);
-                        const nextDisplayRound = (opponentNextMatch?.round_number ?? nextMatch.round_number) + 1;
+                        const isSameTheoreticalMatch = Boolean(
+                            opponentNextMatch &&
+                            (
+                                opponentNextMatch.id === nextMatch.id ||
+                                opponentNextMatch.round_number === nextMatch.round_number
+                            )
+                        );
+                        const nextDisplayRound = opponentNextMatch?.round_number ?? (nextMatch.round_number + 1);
                         opponentNextMatchInfo = {
                             opponentUserId: opponentId,
-                            isReadyToPlay: Boolean(opponentNextMatch && opponentNextMatch.id === nextMatch.id),
+                            isReadyToPlay: isSameTheoreticalMatch,
                             roundNumber: nextDisplayRound
                         };
                     }

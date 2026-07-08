@@ -11,7 +11,7 @@ export async function renderEditPlayedMatches(leagueId) {
             const data = await resp.json();
             if (!resp.ok || !data.imageUrl) {
                 console.warn('Error al cargar imagen de personaje:', data);
-                buttonElement.textContent = '👤 Select Character';
+                buttonElement.textContent = 'Select Character';
                 return;
             }
 
@@ -51,7 +51,7 @@ export async function renderEditPlayedMatches(leagueId) {
         // 2. Renderizar la lista de partidos editables
         contenedor.innerHTML = `
             <div class="auth-container" style="max-width: 580px;">
-                <h2 style="margin-bottom: 20px;">⚙️ Edit Played Matches</h2>
+                <h2 style="margin-bottom: 20px;">Edit Played Matches</h2>
                 
                 <div style="display: flex; flex-direction: column; gap: 14px;">
                     ${partidosJugados.map((m, index) => {
