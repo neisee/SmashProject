@@ -3,9 +3,46 @@ import { mostrarConfirmacionModal, mostrarErrorModal, escapeHTML } from './leagu
 // --- VISTA LIVE ORDENADA DIRECTAMENTE POR TU BACKEND RECURSIVO ---
 export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
     const contenedor = document.getElementById('vista-principal');
-    const { league, participants, nextMatch, currentUsername } = datos;
+    const { league, participants, nextMatch, currentUsername, currentUserId } = datos;
 
     const currentUserText = currentUsername || document.getElementById('btn-edit-profile')?.textContent || '';
+
+    const selectedCharacterId = nextMatch ? (
+        currentUserId === nextMatch.player1 ? nextMatch.character1 :
+        currentUserId === nextMatch.player2 ? nextMatch.character2 :
+        null
+    ) : null;
+
+    const getSelectCharacterButtonContent = () => {
+        if (!selectedCharacterId) {
+            return '👤 Select Character';
+        }
+        return 'Loading selected character...';
+    };
+
+    const renderCharacterButtonImage = async (buttonElement, characterId) => {
+        if (!buttonElement || !characterId) return;
+
+        try {
+            const resp = await fetch(`/api/characters/${characterId}`);
+            const data = await resp.json();
+            if (!resp.ok || !data.imageUrl) {
+                console.warn('No se pudo cargar la imagen del personaje:', data);
+                buttonElement.textContent = '👤 Select Character';
+                return;
+            }
+
+            buttonElement.innerHTML = `
+                <span style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%;">
+                    <img src="${data.imageUrl}" alt="Character ${characterId}" style="height:28px; width:auto; border-radius:4px; box-shadow: 0 0 8px rgba(0,0,0,0.4);">
+                    <span style="font-size: 14px; font-weight: bold;">Change</span>
+                </span>
+            `;
+        } catch (err) {
+            console.error('Error fetching selected character image:', err);
+            buttonElement.textContent = '👤 Select Character';
+        }
+    };
 
     let tarjetaPartidoHTML = `
         <div style="background-color: #1f1f1f; border: 1px dashed #444; border-radius: 8px; padding: 15px; text-align: center;">
@@ -81,7 +118,7 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
                             style="margin-top: 18px; width: 100%; background-color: #242424; color: #ff8b0f; border: 1px solid #ff8b0f; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: all 0.2s ease;"
                             onmouseover="this.style.backgroundColor='rgba(255,139,15,0.1)'; this.style.color='white';" 
                             onmouseout="this.style.backgroundColor='#242424'; this.style.color='#ff8b0f';">
-                        👤 Select Character
+                        ${getSelectCharacterButtonContent()}
                     </button>
                     
                     <button id="btn-post-result" 
@@ -226,6 +263,10 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
             window.history.pushState({}, '', `/league/${leagueId}/select-character/${matchId}`);
             window.dispatchEvent(new Event('popstate'));
         });
+
+        if (selectedCharacterId) {
+            renderCharacterButtonImage(btnSelectCharacter, selectedCharacterId);
+        }
     }
 
     document.getElementById('btn-back-active').addEventListener('click', () => {

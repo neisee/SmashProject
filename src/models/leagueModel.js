@@ -279,7 +279,7 @@ const LeagueModel = {
                 (m.player2 = $1 AND m.character2 = c.character_id AND m.lives_player2 > m.lives_player1)
             )`
         const { rows } = await pool.query(query, [playerId, leagueId]);
-        return rows.map(row => row.characterId);
+        return rows.map(row => row.character_id);
     },
 
     isPartOfTheMatch: async (userId, matchId) => {

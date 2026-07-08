@@ -5,16 +5,25 @@ export async function renderSelectCharacter(leagueId, matchId) {
 
     // Pedimos al servidor la lista real de imágenes disponibles
     let personajes = [];
+    let bloqueados = [];
     try {
-        const resp = await fetch('/api/characters');
-        const json = await resp.json();
-        if (resp.ok && Array.isArray(json.images)) {
-            personajes = json.images.map((filename, idx) => ({ id: idx + 1, archivo: filename }));
-        } else {
-            console.warn('Respuesta inválida al pedir imágenes:', json);
+        // 1️⃣ Pedimos en paralelo los personajes totales y los personajes bloqueados de tu nuevo endpoint
+        const [respPersonajes, respBloqueados] = await Promise.all([
+            fetch('/api/characters'),
+            fetch(`/api/leagues/${leagueId}/select-character/${matchId}`)
+        ]);
+
+        const jsonPersonajes = await respPersonajes.json();
+        if (respPersonajes.ok && Array.isArray(jsonPersonajes.images)) {
+            personajes = jsonPersonajes.images.map((filename, idx) => ({ id: idx + 1, archivo: filename }));
+        }
+
+        // Guardamos los IDs bloqueados que devuelve tu controlador
+        if (respBloqueados.ok) {
+            bloqueados = await respBloqueados.json(); // Esperamos que sea un array de ints puro
         }
     } catch (err) {
-        console.error('Error al obtener imágenes de personajes:', err);
+        console.error('Error al cargar datos iniciales:', err);
     }
 
     // Variable para almacenar el ID del personaje seleccionado actualmente
@@ -38,6 +47,9 @@ export async function renderSelectCharacter(leagueId, matchId) {
             z-index: 10;
         ">
             <h2 style="margin-bottom: 5px; text-align: center; color: #fff; font-size: 26px;">Select Your Character</h2>
+            <p style="text-align: center; color: #ff8b0f; font-size: 13px; margin-top: 0; margin-bottom: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px;">
+                Match Center • Match #${matchId}
+            </p>
 
             <div style="
                 display: grid; 
@@ -52,31 +64,45 @@ export async function renderSelectCharacter(leagueId, matchId) {
                 width: 100%;
                 box-sizing: border-box;
             ">
-                ${personajes.map(p => `
-                    <div class="character-card" 
+                ${personajes.map(p => {
+                    // 2️⃣ Comprobamos si este personaje específico está bloqueado
+                    const isBlocked = bloqueados.includes(p.id);
+
+                    return `
+                    <div class="${isBlocked ? 'character-card-blocked' : 'character-card'}" 
                          data-id="${p.id}"
                          style="
                              aspect-ratio: 3 / 2; 
-                             background-color: #262626; 
-                             border: 2px solid #444; 
+                             background-color: ${isBlocked ? '#0f0f0f' : '#262626'}; 
+                             border: 2px solid ${isBlocked ? '#222' : '#444'}; 
                              border-radius: 4px; 
-                             cursor: pointer; 
+                             cursor: ${isBlocked ? 'not-allowed' : 'pointer'}; 
                              overflow: hidden; 
                              transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
                              position: relative;
                              display: flex;
                              align-items: center;
                              justify-content: center;
+                             ${isBlocked ? 'pointer-events: none;' : ''} /* 🚫 Evita clicks por completo */
                          "
+                         ${!isBlocked ? `
                          onmouseover="if(this.style.borderColor !== 'rgb(255, 139, 15)') { this.style.borderColor='#ff6b6b'; this.style.transform='scale(1.06)'; this.style.zIndex='10'; }"
                          onmouseout="if(this.style.borderColor !== 'rgb(255, 139, 15)') { this.style.borderColor='#444'; this.style.transform='scale(1)'; this.style.zIndex='1'; }"
+                         ` : ''}
                     >
                         <img src="/images/Characters/${p.archivo}" 
                              alt="Character ${p.id}" 
-                             style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;"
+                             style="
+                                width: 100%; 
+                                height: 100%; 
+                                object-fit: cover; 
+                                pointer-events: none;
+                                ${isBlocked ? 'filter: grayscale(100%) brightness(30%);' : ''} /* 🕶️ Foto apagada/oscura */
+                             "
                         />
                     </div>
-                `).join('')}
+                    `;
+                }).join('')}
             </div>
 
             <div style="display: flex; gap: 16px; max-width: 500px; margin: 0 auto;">

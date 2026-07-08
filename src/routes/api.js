@@ -42,4 +42,27 @@ router.get('/characters', (req, res) => {
 	});
 });
 
+router.get('/characters/:characterId', (req, res) => {
+	const characterId = parseInt(req.params.characterId, 10);
+	if (Number.isNaN(characterId) || characterId < 1) {
+		return res.status(400).json({ error: 'Invalid character ID.' });
+	}
+
+	const dir = path.join(__dirname, '..', '..', 'public', 'images', 'Characters');
+	fs.readdir(dir, (err, files) => {
+		if (err) {
+			console.error('Error leyendo carpeta de personajes:', err);
+			return res.status(500).json({ error: 'No se pudo leer la carpeta de personajes' });
+		}
+
+		const images = files.filter(f => /\.(png|jpe?g|gif)$/i.test(f)).sort();
+		if (characterId > images.length) {
+			return res.status(404).json({ error: 'Character not found.' });
+		}
+
+		const filename = images[characterId - 1];
+		res.json({ characterId, filename, imageUrl: `/images/Characters/${filename}` });
+	});
+});
+
 module.exports = router;

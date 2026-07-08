@@ -280,6 +280,7 @@ const leagueController = {
                 league,
                 participants,
                 isCreator, // 👈 Enviamos este booleano limpio al frontend
+                currentUserId,
                 nextMatch
             });
 
@@ -513,27 +514,31 @@ const leagueController = {
     },
 
     getUnableCharacters: async (req, res) => {
+        // 1️⃣ Validamos que exista la cookie de sesión
         if (!req.cookies || !req.cookies.auth_session) {
             return res.status(401).json({ error: 'Unauthorized: No session cookie found.' });
         }
+        
         const cookieValue = req.cookies.auth_session;
         const currentUserId = parseInt(cookieValue.split('logged_in_user_')[1], 10);
-        const { leagueId } = req.params;
-        const { userId } = req.body;
-        try{
+        
+        // 2️⃣ Extraemos las variables de la URL (params)
+        const { leagueId, matchId } = req.params; 
+
+        try {
+            // 3️⃣ Validamos que el usuario realmente pertenezca a la liga
             const isParticipantC = await LeagueModel.isParticipant(currentUserId, leagueId);
             if (!isParticipantC){
-                return res.status(401).json({ error: 'You cannot get information while not being part of the league' });
+                return res.status(403).json({ error: 'You cannot get information while not being part of the league' });
             }
-            const isParticipantU = await LeagueModel.isParticipant(userId, leagueId);
-            if (!isParticipantU){
-                return res.status(401).json({ error: 'This user is not part of the league' });
-            }
-            const blockedCharactersId = await LeagueModel.getBlockedCharacters(leagueId, userId);
-            return res.status(200).json({
-                blockedCharactersId: blockedCharactersId
-            })
-        } catch (error){
+
+            // 4️⃣ Llamamos al modelo pasándole el ID del usuario actual
+            const blockedCharactersId = await LeagueModel.getBlockedCharacters(leagueId, currentUserId);
+            
+            // 5️⃣ Devolvemos el array de ints puro para que tu vista lo reciba correctamente
+            return res.status(200).json(blockedCharactersId);
+            
+        } catch (error) {
             console.error('Error in getUnableCharacters:', error);
             return res.status(500).json({ error: 'Internal server error.' });
         }
