@@ -115,7 +115,7 @@ async function fetchLeagues() {
                             <p style="margin: 5px 0; color: #ccc;">Creator: <strong>${league.creador}</strong></p>
                             <p style="margin: 5px 0; color: #ccc;">Code: <code>${league.invitation_code}</code></p>
                             <span style="font-size: 14px; color: ${league.in_progress ? '#ff9800' : '#4caf50'}">
-                                ${league.in_progress ? '⏳ In progress' : 'Open registrations'}
+                                ${league.in_progress ? 'In progress' : 'Open registrations'}
                             </span>
                         </div>
                         ${botonAccion}

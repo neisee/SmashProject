@@ -57,7 +57,7 @@ export async function renderEditPlayedMatches(leagueId) {
                     ${partidosJugados.map((m, index) => {
                         const usuarioActualEsP1 = datos.currentUserId === m.player1;
                         const selectedCharacterId = usuarioActualEsP1 ? m.character1 : m.character2;
-                        const botonTexto = selectedCharacterId ? 'Loading selected character...' : '👤 Select Character';
+                        const botonTexto = selectedCharacterId ? 'Loading selected character...' : 'Select Character';
                         
                         // 🛑 DETECTAR SI ES BYE ROUND (Si alguno de los dos IDs es nulo o el string 'null')
                         const esBye = (!m.player1 || m.player1 === 'null' || !m.player2 || m.player2 === 'null');
@@ -107,7 +107,7 @@ export async function renderEditPlayedMatches(leagueId) {
                 </div>
 
                 <button id="btn-back-to-league" class="btn-auth" style="background-color: #242424; color: white; margin-top: 20px; width: 100%;">
-                    ↩️ Back to League
+                    Back to League
                 </button>
             </div>
         `;
