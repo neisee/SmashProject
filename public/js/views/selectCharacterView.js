@@ -47,9 +47,6 @@ export async function renderSelectCharacter(leagueId, matchId) {
             z-index: 10;
         ">
             <h2 style="margin-bottom: 5px; text-align: center; color: #fff; font-size: 26px;">Select Your Character</h2>
-            <p style="text-align: center; color: #ff8b0f; font-size: 13px; margin-top: 0; margin-bottom: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px;">
-                Match Center • Match #${matchId}
-            </p>
 
             <div style="
                 display: grid; 
