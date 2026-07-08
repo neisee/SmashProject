@@ -270,7 +270,7 @@ const LeagueModel = {
 
     getBlockedCharacters: async (leagueId, playerId) => {
         const query = `
-            SELECT DISTINCT c.* FROM CharactersS c
+            SELECT DISTINCT c.character_id FROM CharactersS c
             JOIN Matches m ON (c.character_id = m.character1 OR c.character_id = m.character2)
             WHERE m.league_id = $2
             AND (
@@ -279,7 +279,42 @@ const LeagueModel = {
                 (m.player2 = $1 AND m.character2 = c.character_id AND m.lives_player2 > m.lives_player1)
             )`
         const { rows } = await pool.query(query, [playerId, leagueId]);
-        return rows;
+        return rows.map(row => row.characterId);
+    },
+
+    isPartOfTheMatch: async (userId, matchId) => {
+        const query = 'SELECT * FROM Matches WHERE id = $1 AND (player1 = $2 OR player2 = $2)';
+        const result = await pool.query(query, [matchId, userId]);
+        return result.rows[0];
+    },
+    
+    addCharacterInMatch: async (characterId, matchId, playerId) => {
+        const querySelect = 'SELECT player1, player2 FROM Matches WHERE id = $1';
+        const partido = await pool.query(querySelect, [matchId]);
+
+        if (partido.rows.length === 0) {
+            throw new Error('MATCH_NOT_FOUND');
+        }
+
+        const { player1, player2 } = partido.rows[0];
+        let columnaAEditar = null;
+
+        if (playerId === player1) {
+            columnaAEditar = 'character1';
+        } else if (playerId === player2) {
+            columnaAEditar = 'character2';
+        } else {
+            throw new Error('PLAYER_NOT_IN_MATCH');
+        }
+
+        const queryUpdate = `
+            UPDATE Matches 
+            SET ${columnaAEditar} = $1 
+            WHERE id = $2
+        `;
+
+        await pool.query(queryUpdate, [characterId, matchId]);
+        return { success: true, columnUpdated: columnaAEditar };
     }
 };
 

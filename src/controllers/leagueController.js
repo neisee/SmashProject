@@ -529,12 +529,50 @@ const leagueController = {
             if (!isParticipantU){
                 return res.status(401).json({ error: 'This user is not part of the league' });
             }
-            const blockedCharacters = await LeagueModel.getBlockedCharacters(leagueId, userId);
+            const blockedCharactersId = await LeagueModel.getBlockedCharacters(leagueId, userId);
             return res.status(200).json({
-                blockedCharacters: blockedCharacters
+                blockedCharactersId: blockedCharactersId
             })
         } catch (error){
             console.error('Error in getUnableCharacters:', error);
+            return res.status(500).json({ error: 'Internal server error.' });
+        }
+    },
+
+    selectCharacter: async (req, res) => {
+        if (!req.cookies || !req.cookies.auth_session) {
+            return res.status(401).json({ error: 'Unauthorized: No session cookie found.' });
+        }
+        const cookieValue = req.cookies.auth_session;
+        const currentUserId = parseInt(cookieValue.split('logged_in_user_')[1], 10);
+        const { leagueId, matchId } = req.params;
+        const { characterId } = req.body;
+        try {
+            const isPlayerOfMatch = await LeagueModel.isPartOfTheMatch(currentUserId, matchId);
+            if (!isPlayerOfMatch){
+                return res.status(403).json({ error: 'You do not have access to this game' });
+            }
+            if (characterId < 77 && 0 < characterId){
+                await LeagueModel.addCharacterInMatch(characterId, matchId, currentUserId);
+            }
+            else if (characterId === 77){
+                const blockedCharactersId = await LeagueModel.getBlockedCharacters(leagueId, currentUserId);
+                const allIds = Array.from({ length: 76 }, (_, i) => i + 1);
+                const idsPermitidos = allIds.filter(id => !blockedCharactersId.includes(id));
+
+                if (idsPermitidos.length === 0) {
+                    return res.status(400).json({ error: "You cannot use more characters bro" });
+                }
+                const indiceAleatorio = Math.floor(Math.random() * idsPermitidos.length);
+                const randomCharacterId = idsPermitidos[indiceAleatorio];
+                await LeagueModel.addCharacterInMatch(randomCharacterId, matchId, currentUserId);
+            }
+            else{
+                return res.status(403).json({ error: 'Wrong id' });
+            }
+            return res.status(200).json({ success: true, message: 'Character locked successfully!' });
+        } catch (error) {
+            console.error('Error in selectCharacter:', error);
             return res.status(500).json({ error: 'Internal server error.' });
         }
     }

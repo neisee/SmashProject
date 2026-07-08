@@ -130,7 +130,7 @@ export async function renderSelectCharacter(leagueId, matchId) {
         if (!confirmado) return;
 
         try {
-            const res = await fetch(`/api/leagues/${leagueId}/matches/${matchId}/select-character`, {
+            const res = await fetch(`/api/leagues/${leagueId}/select-character/${matchId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

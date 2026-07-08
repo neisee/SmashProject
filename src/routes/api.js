@@ -23,6 +23,8 @@ router.get('/leagues/:id/details', leagueController.getLeagueDetails);
 router.post('/leagues/kick', leagueController.kickParticipant);
 router.put('/leagues/:id/start', leagueController.startLeague);
 router.delete('/leagues/:leagueId', leagueController.deleteLeague);
+router.get('/leagues/:leagueId/select-character/:matchId', leagueController.getUnableCharacters);
+router.put('/leagues/:leagueId/select-character/:matchId', leagueController.selectCharacter);
 router.get('/leagues/:leagueId/matches', leagueController.getLeagueMatches);
 router.put('/leagues/:leagueId/matches/result', leagueController.updateMatchResult);
 
