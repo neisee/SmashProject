@@ -48,7 +48,7 @@ export async function renderSelectCharacter(leagueId, matchId) {
         ">
             <h2 style="margin-bottom: 5px; text-align: center; color: #fff; font-size: 26px;">Select Your Character</h2>
 
-            <div style="
+            <div id="select-character-grid" style="
                 display: grid; 
                 grid-template-columns: repeat(11, 1fr); 
                 grid-template-rows: repeat(7, auto); 
@@ -112,6 +112,26 @@ export async function renderSelectCharacter(leagueId, matchId) {
             </div>
         </div>
     `;
+
+    const grid = document.getElementById('select-character-grid');
+    if (grid) {
+        const applyMobileLayout = () => {
+            if (window.innerWidth <= 850) {
+                grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(90px, 1fr))';
+                grid.style.gridTemplateRows = 'none';
+                grid.style.maxWidth = '100%';
+                grid.style.overflow = 'visible';
+            } else {
+                grid.style.gridTemplateColumns = 'repeat(11, 1fr)';
+                grid.style.gridTemplateRows = 'repeat(7, auto)';
+                grid.style.maxWidth = 'none';
+                grid.style.overflow = 'visible';
+            }
+        };
+
+        applyMobileLayout();
+        window.addEventListener('resize', applyMobileLayout);
+    }
 
     // --- LOGICA DE SELECCIÓN VISUAL ---
     const tarjetas = document.querySelectorAll('.character-card');

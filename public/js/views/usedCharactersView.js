@@ -63,7 +63,7 @@ export async function renderUsedCharacters(leagueId, userId) {
                     Characters used to win a game by this player in this league
                 </p>
 
-                <div style="
+                <div id="used-characters-grid" style="
                     display: grid;
                     grid-template-columns: repeat(11, 1fr);
                     gap: 10px;
@@ -86,6 +86,7 @@ export async function renderUsedCharacters(leagueId, userId) {
                             display: flex;
                             align-items: center;
                             justify-content: center;
+                            min-width: 70px;
                         ">
                             <img src="/images/Characters/${personaje.archivo}" alt="Character ${personaje.id}" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" />
                         </div>
@@ -103,6 +104,22 @@ export async function renderUsedCharacters(leagueId, userId) {
                 </div>
             </div>
         `;
+
+        const grid = document.getElementById('used-characters-grid');
+        if (grid) {
+            const applyMobileLayout = () => {
+                if (window.innerWidth <= 850) {
+                    grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(90px, 1fr))';
+                    grid.style.maxWidth = '100%';
+                } else {
+                    grid.style.gridTemplateColumns = 'repeat(11, 1fr)';
+                    grid.style.maxWidth = 'none';
+                }
+            };
+
+            applyMobileLayout();
+            window.addEventListener('resize', applyMobileLayout);
+        }
 
         document.getElementById('btn-back-to-league').addEventListener('click', () => {
             window.history.back();
