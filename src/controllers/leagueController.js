@@ -568,17 +568,27 @@ const leagueController = {
         const currentUserId = parseInt(cookieValue.split('logged_in_user_')[1], 10);
         
         // 2️⃣ Extraemos las variables de la URL (params)
-        const { leagueId, matchId } = req.params; 
+        const { leagueId, matchId, userId } = req.params;
+        const targetUserId = userId ? parseInt(userId, 10) : currentUserId;
+
+        if (Number.isNaN(targetUserId)) {
+            return res.status(400).json({ error: 'Invalid user id.' });
+        }
 
         try {
-            // 3️⃣ Validamos que el usuario realmente pertenezca a la liga
+            // 3️⃣ Validamos que el usuario actual realmente pertenezca a la liga
             const isParticipantC = await LeagueModel.isParticipant(currentUserId, leagueId);
             if (!isParticipantC){
                 return res.status(403).json({ error: 'You cannot get information while not being part of the league' });
             }
 
-            // 4️⃣ Llamamos al modelo pasándole el ID del usuario actual
-            const blockedCharactersId = await LeagueModel.getBlockedCharacters(leagueId, currentUserId);
+            const isTargetParticipant = await LeagueModel.isParticipant(targetUserId, leagueId);
+            if (!isTargetParticipant) {
+                return res.status(404).json({ error: 'The requested player is not part of this league.' });
+            }
+
+            // 4️⃣ Llamamos al modelo pasándole el usuario que queremos consultar
+            const blockedCharactersId = await LeagueModel.getBlockedCharacters(leagueId, targetUserId);
             
             // 5️⃣ Devolvemos el array de ints puro para que tu vista lo reciba correctamente
             return res.status(200).json(blockedCharactersId);

@@ -205,6 +205,8 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
                         const fuentePeso = (esVerdeTop || esAmarilloTop || esRojoFinal) ? 'bold' : '500';
                         const colorBorde = esVerdeTop ? '#00e676' : (esAmarilloTop ? '#ffd700' : (esRojoFinal ? '#ff3333' : (esUsuarioActual ? '#4caf50' : '#333')));
 
+                        const shouldShowUsedCharactersButton = (p.wins || 0) >= 1;
+
                         return `
                         <li style="background-color: ${esUsuarioActual ? '#1e291e' : '#242424'}; border: 1px solid ${colorBorde}; padding: 10px 14px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
                             <div>
@@ -212,7 +214,12 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
                                 <span style="font-weight: ${fuentePeso}; color: ${colorNombre};">${escapeHTML(p.username)}</span>
                                 ${esUsuarioActual ? '<span style="font-size: 11px; color: #4caf50; margin-left: 5px;">(You)</span>' : ''}
                             </div>
-                            <div style="font-size: 12px; color: #aaa; display: flex; gap: 14px; align-items: center;">
+                            <div style="font-size: 12px; color: #aaa; display: flex; gap: 10px; align-items: center;">
+                                ${shouldShowUsedCharactersButton ? `
+                                    <button class="btn-view-used-characters" data-user-id="${p.user_id}" data-league-id="${leagueId}" style="background: none; border: 1px solid #ff8b0f; color: #ff8b0f; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 11px; font-weight: bold;">
+                                        Characters
+                                    </button>
+                                ` : ''}
                                 <span>Record: <b style="color: white; font-size: 13px;">${p.wins || 0}-${p.losses || 0}</b></span>
                                 <span>Lives: <b style="color: ${colorVidas}; font-size: 13px;">${stringVidas}</b></span>
                             </div>
@@ -302,6 +309,22 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
         window.history.pushState({}, '', `/league/${leagueId}/edit-matches`);
         window.dispatchEvent(new Event('popstate'));
     });
+
+    const participantList = document.getElementById('active-participants-list');
+    if (participantList) {
+        participantList.addEventListener('click', (event) => {
+            const btn = event.target.closest('.btn-view-used-characters');
+            if (!btn) return;
+
+            const userId = btn.getAttribute('data-user-id');
+            const leagueIdFromButton = btn.getAttribute('data-league-id');
+            if (!userId || !leagueIdFromButton) return;
+
+            limpiarSocket();
+            window.history.pushState({}, '', `/league/${leagueIdFromButton}/used-characters/${userId}`);
+            window.dispatchEvent(new Event('popstate'));
+        });
+    }
 
     const btnPostResult = document.getElementById('btn-post-result');
     if (btnPostResult) {

@@ -59,6 +59,10 @@ body {
     border: 1px solid #333; 
 }
 
+#logo-home span {
+    display: inline;
+}
+
 /* CONTENEDOR CENTRAL (Clavado en el centro real de la pantalla) */
 .header-center {
     display: flex;
@@ -377,6 +381,12 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   appearance: none;
   -moz-appearance: none; /* Por si acaso da soporte a versiones muy viejas, pero ya acepta 'none' */
+}
+
+@media (max-width: 670px) {
+    #logo-home span {
+        display: none;
+    }
 }
 
 /* --- BOTONES DE ACCIÓN DENTRO DE LAS TARJETAS --- */

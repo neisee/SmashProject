@@ -7,6 +7,7 @@ import { renderEditAccount } from './views/editAccountView.js';
 import { renderLeagueDetails } from './views/leagueDetailsView.js';
 import { renderEditPlayedMatches } from './views/editPlayedMatchesView.js';
 import { renderSelectCharacter } from './views/selectCharacterView.js';
+import { renderUsedCharacters } from './views/usedCharactersView.js';
 
 // Auxiliar para consultar la cookie al servidor
 async function checkAuthStatus() {
@@ -101,6 +102,18 @@ async function evaluarRuta() {
                 return renderHola();
             }
             return renderEditPlayedMatches(leagueId);
+        }
+        else if (rutaActual.startsWith('/league/') && rutaActual.includes('/used-characters/')) {
+            const partes = rutaActual.split('/league/')[1].split('/used-characters/');
+            const leagueId = partes[0];
+            const userId = partes[1];
+
+            if (!leagueId || isNaN(leagueId) || !userId || isNaN(userId)) {
+                window.history.replaceState({}, '', '/hola');
+                return renderHola();
+            }
+
+            return renderUsedCharacters(leagueId, userId);
         }
         else if (rutaActual.startsWith('/league/') && rutaActual.includes('/select-character/')) {
             // Extraemos los IDs de la ruta /league/12/select-character/45

@@ -76,7 +76,7 @@ app.get('*path', (req, res) => {
 
 // 🌟 CAMBIO IMPORTANTE: Ahora escuchamos con 'server', no con 'app'
 server.listen(PORT, () => {
-    console.log(`🚀 Servidor HTTP y WebSocket corriendo en el puerto ${PORT}`);
+    console.log(`Servidor HTTP y WebSocket corriendo en el puerto ${PORT}`);
 });
 
 // 🔥 Exportamos la función para que 'leagueController.js' pueda requerirla
