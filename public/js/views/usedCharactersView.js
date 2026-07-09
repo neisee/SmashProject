@@ -49,7 +49,8 @@ export async function renderUsedCharacters(leagueId, userId) {
                 transform: translateX(-50%);
                 width: 90vw;
                 max-width: 1400px;
-                margin: 40px auto;
+                margin: 0 auto 20px;
+                top: 90px;
                 padding: 25px;
                 background-color: #1e1e1e;
                 border-radius: 12px;
@@ -57,6 +58,8 @@ export async function renderUsedCharacters(leagueId, userId) {
                 box-shadow: 0 10px 40px rgba(0,0,0,0.6);
                 box-sizing: border-box;
                 z-index: 10;
+                max-height: calc(100vh - 140px);
+                overflow-y: auto;
             ">
                 <h2 style="margin-bottom: 5px; text-align: center; color: #fff; font-size: 26px;">Used Characters</h2>
                 <p style="text-align: center; color: #ff8b0f; font-size: 14px; margin-top: 0; margin-bottom: 20px; font-weight: bold;">
@@ -109,8 +112,9 @@ export async function renderUsedCharacters(leagueId, userId) {
         if (grid) {
             const applyMobileLayout = () => {
                 if (window.innerWidth <= 850) {
-                    grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(90px, 1fr))';
+                    grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(80px, 1fr))';
                     grid.style.maxWidth = '100%';
+                    grid.style.maxHeight = 'none';
                 } else {
                     grid.style.gridTemplateColumns = 'repeat(11, 1fr)';
                     grid.style.maxWidth = 'none';
