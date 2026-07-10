@@ -77,7 +77,7 @@ export function renderActiveLeagueDetails(leagueId, datos, onRefresh) {
                             style="width: 100%; background-color: #4caf50; color: #121212; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s;"
                             onmouseover="this.style.backgroundColor='#66bb6a'" 
                             onmouseout="this.style.backgroundColor='#4caf50'">
-                        Next Round ➡️
+                        Next Round
                     </button>
                 </div>
             `;
